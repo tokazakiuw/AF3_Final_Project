@@ -180,7 +180,7 @@ gender_boxplot_percentage <- ggplot(data=cms_data %>%
 gender_boxplot_percentage
 ```
 
-In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value for males is slightly higher on average with a value of when compared to females.
+In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value rate for males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for females.
 
 ## Section 3 - Data
 
