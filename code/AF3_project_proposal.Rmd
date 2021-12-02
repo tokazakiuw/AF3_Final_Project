@@ -1,0 +1,279 @@
+---
+title: "Prevention is Better than Cure—Statistical Observations of Cardiovascular Disease Data"
+author: "Ty Kentaro Okazaki, Matthew R Herradura, David Xie, Carsom Klein"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+```{r load-data, message=FALSE}
+cms_data <- read.csv("../data/cms_data.csv")
+```
+
+## Section 1 - Introduction
+
+Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease?
+
+Null Hypothesis: Predictor variables such as age, gender, and ethnicity will have no influence on a patient's susceptibility for developing cardiovascular disease.
+
+Alternative Hypothesis: Predictor variables such as age, gender, and ethnicity will influence a patient's susceptibility for developing cardiovascular disease.
+
+## Section 2 - Data Analysis Plan
+
+Outcome variable (dependent; Y):
+
+-   `Data_Value` (Numeric)---prevalence and rate of cardiovascular disease hospitalizations
+
+Predictor variables (explanatory; X):
+
+-   `Break_Out (Break_Out_Category == "Age")` (Numeric)---demographic categorization by age.
+
+-   `Break_Out (Break_Out_Category == "Gender")` (two level categorical)---demographic categorization by gender.
+
+-   `Break_Out (Break_Out_Category == "Race")` (two+ level categorical)---demographic categorization by race/ethnicity.
+
+-   `Year` (Numeric)---year data was collected.
+
+-   `LocationAbbr` (two+ level categorical)---demographic categorization by location: states
+
+-   `PriorityArea1` (two level categorical)---demographic categorization by inclusion of Million Hearts® or not in observed location.
+
+-   `PriorityArea3` (two level categorical)---demographic categorization by inclusion of Healthy People 2020 or not in observed location.
+
+-   `PriorityArea4` (two level categorical)---demographic categorization by inclusion of AHA 2020 Goals: Cardiovascular Health Metrics or not in observed location.
+
+The outcome (dependent, response, Y) variable in this given data frame is represented by Data_Value, which is numerical and represents the prevalence and rate of cardiovascular disease hospitalizations for Medicare & Medicaid patients ages 65+ across the United States. Predictor (independent, explanatory, X) variables used to answer the general research question can be dissected into three primary categories: numerical predictors, two level categorical predictors, and two+ level categorical predictors. Of the numerous example predictors presented above, the main variables of our project include: Break_Out (Age, Gender, Race), Year, and Location. In terms of numerical predictors (Age, Year), quantitative variables are measured by values on a numeric scale (ex. years 2004-2013). For two level categorical predictors (Gender), qualitative variables are measured by a name or label and fit into two distinct categories (ex. Male and Female). Lastly, two+ level categorical predictors (Race, Location), qualitative variables are measured by a name or label and fit into multiple distinct categories (ex. Non-Hispanic Black, Non-Hispanic White, Hispanic, and Other).
+
+As for the challenges we foresee in working with the data, it is essential that we process the data set in a manner that retains accuracy and improves clarity. When cleaning up column names and re-coding values, for example, it is crucial that cautionary measures are taken as to not delete or override data in a way that hinders the integrity of the original data set. Especially since our main outcome variable is represented by different units (ex. percent and Rate per 1,000), it is important to account for differences in observations to gather representative insights. When analyzing the data, furthermore, the influence of confounding variables when comparing predictors (ex. unaccounted influence of ethnicity when comparing CVD prevalence with age) presents a problem to the accuracy of our findings. As a result, it is important to analyze the influences of different variables and how they are useful in interpreting the context of the data and outcomes. Moreover, using statistical methods such as Bootstrapping, Regression Analysis, or Correlation Score will be helpful in answering the general research question in a more representative and logical manner. Using Bootstrapping as an approach, for example, can be useful in deriving confidence intervals and the distribution of proportions for simulated samples based on the original data. Subsequently, results from statistical methods can be useful in providing evidence for rejecting/accepting null or alternative hypotheses. Referencing p-values generated from bootstrapping and setting a significance level prior, for example, provides justification for rejecting/accepting a null hypothesis based on a calculated sample. To improve accuracy, our group will analyze the influence of multiple predictor variables and whether statistical methods are statistically significant to reject the null hypothesis (assuming null hypothesis is true unless proven otherwise).
+
+#### Preliminary Exploratory Data Analysis
+
+```{r initial-statistics}
+## Summarize the mean, median, IQR, and sd by Age and Percentage
+gender_stats_percentage <- cms_data %>% 
+  filter(Break_Out_Category == "Age", Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_percentage
+
+## Summarize the mean, median, IQR, and sd by Age and Rate
+gender_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Age", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_rate
+
+## Summarize the mean, median, IQR, and sd by Gender and Percentage
+gender_stats_percentage <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_percentage
+
+## Summarize the mean, median, IQR, and sd by Gender and Rate
+gender_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_rate
+
+## Summarize the mean, median, IQR, and sd by Race and Percentage
+race_stats_percentage <- cms_data %>% 
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+race_stats_percentage
+
+## Summarize the mean, median, IQR, and sd by Race and Rate
+race_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+race_stats_rate
+```
+
+```{r faceted-visualization}
+## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Rate
+faceted_plot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 6) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Data_Value for all Years (2004-2013)",
+                         subtitle="Faceted by Break_Out (various predictor variables)",
+                         x="Data_Value")
+faceted_plot_rate
+
+## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Percentage
+faceted_plot_percentage <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<75, Data_Value_Unit=="Percent (%)"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 6) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Data_Value for all Years (2004-2013)",
+                         subtitle="Faceted by Break_Out (various predictor variables)",
+                         x="Data_Value")
+faceted_plot_percentage
+
+## Boxplot displaying relationship between gender and Data_Value for all observations (2004-2013) by Rate
+gender_boxplot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Gender", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot() +
+                    labs(title="Comparing relationship between Data_Value and Break_Out (Age)",
+                         subtitle="All observed data from years: 2004-2013",
+                         y="Data_Value",
+                         x="Break_Out",
+                         fill="Gender")
+gender_boxplot_rate
+
+## Boxplot displaying relationship between gender and Data_Value for all observations (2004-2013) by Percentage
+gender_boxplot_percentage <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Gender", Data_Value_Unit=="Percent (%)"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot() +
+                    labs(title="Comparing relationship between Data_Value and Break_Out (Age)",
+                         subtitle="All observed data from years: 2004-2013",
+                         y="Data_Value",
+                         x="Break_Out",
+                         fill="Gender")
+gender_boxplot_percentage
+```
+
+In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value for males is slightly higher on average with a value of when compared to females.
+
+## Section 3 - Data
+
+#### Code Book
+
+This data set includes instances of cardiovascular disease (CVD), potential indicators, and associated risk factors for Medicare and Medicaid patients across the United States.
+
+Dimensions of the `cms_data` data frame.
+
+-   Rows/Observations: 42,640
+
+-   Columns/Variables: 29
+
+Print the output of `glimpse` of data frame: `cms_data`
+
+```{r glimpse-data}
+glimpse(cms_data)
+```
+
+A description of the variables is below:
+
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| Variable Name                | Description                                                                                                   | Data Type  |
++==============================+===============================================================================================================+============+
+| `Year`                       | Year                                                                                                          | Number     |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationAbbr`               | Location abbreviation                                                                                         | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationDesc`               | Location description                                                                                          | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `DataSource`                 | Abbreviation of data source                                                                                   | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea1`              | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea2`              | Priority Area (ABCS or None)                                                                                  | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea3`              | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea4`              | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Category`                   | Category description                                                                                          | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Topic`                      | Topic description                                                                                             | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Indicator`                  | Indicator description                                                                                         | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Type`            | Data Value Type (mean, rate, percentage)                                                                      | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Unit`            | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value`                 | Data value (point estimate)                                                                                   | Number     |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Alt`             | Equal to data value, but formatting is numeric                                                                | Number     |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Footnote_Symbol` | Symbol that would be used to flag footnotes                                                                   | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Footnote`        | Footnote description                                                                                          | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LowConfidenceLimit`         | 95% confidence interval lower bound                                                                           | Number     |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `HighConfidenceLimit`        | 95% confidence interval upper bound                                                                           | Number     |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out_Category`         | Break out category description                                                                                | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out`                  | Break out group description                                                                                   | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `CategoryId`                 | Category lookup value                                                                                         | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `TopicId`                    | Topic lookup value                                                                                            | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `IndicatorId`                | Indicator lookup value                                                                                        | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_TypeID`          | Data value type lookup value                                                                                  | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `BreakOutCategoryId`         | Break out category lookup value                                                                               | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `BreakOutId`                 | Break out group lookup value                                                                                  | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationId`                 | Location lookup value                                                                                         | Plain Text |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `GeoLocation`                | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
+
+Related Sources:
+
+<https://data.cms.gov/provider-data/topics/hospitals/about-data>
+
+<https://www.ncbi.nlm.nih.gov/books/NBK189626/>
+
+<https://www.cdc.gov/dhdsp/maps/dtm/glossary.htm>
+
+<https://millionhearts.hhs.gov/>
+
+<https://www.healthypeople.gov/2020>
+
+<https://www.heart.org/en/about-us/annual-report/impact-goal-2020>
