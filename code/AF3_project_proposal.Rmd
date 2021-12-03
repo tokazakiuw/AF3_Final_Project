@@ -49,7 +49,7 @@ Predictor variables (explanatory; X):
 
 The outcome (dependent, response, Y) variable in this given data frame is represented by Data_Value, which is numerical and represents the prevalence and rate of cardiovascular disease hospitalizations for Medicare & Medicaid patients ages 65+ across the United States. Predictor (independent, explanatory, X) variables used to answer the general research question can be dissected into three primary categories: numerical predictors, two level categorical predictors, and two+ level categorical predictors. Of the numerous example predictors presented above, the main variables of our project include: Break_Out (Age, Gender, Race), Year, and Location. In terms of numerical predictors (Age, Year), quantitative variables are measured by values on a numeric scale (ex. years 2004-2013). For two level categorical predictors (Gender), qualitative variables are measured by a name or label and fit into two distinct categories (ex. Male and Female). Lastly, two+ level categorical predictors (Race, Location), qualitative variables are measured by a name or label and fit into multiple distinct categories (ex. Non-Hispanic Black, Non-Hispanic White, Hispanic, and Other).
 
-As for the challenges we foresee in working with the data, it is essential that we process the data set in a manner that retains accuracy and improves clarity. When cleaning up column names and re-coding values, for example, it is crucial that cautionary measures are taken as to not delete or override data in a way that hinders the integrity of the original data set. Especially since our main outcome variable is represented by different units (ex. percent and Rate per 1,000), it is important to account for differences in observations to gather representative insights. When analyzing the data, furthermore, the influence of confounding variables when comparing predictors (ex. unaccounted influence of ethnicity when comparing CVD prevalence with age) presents a problem to the accuracy of our findings. As a result, it is important to analyze the influences of different variables and how they are useful in interpreting the context of the data and outcomes. Moreover, using statistical methods such as Bootstrapping, Regression Analysis, or Correlation Score will be helpful in answering the general research question in a more representative and logical manner. Using Bootstrapping as an approach, for example, can be useful in deriving confidence intervals and the distribution of proportions for simulated samples based on the original data. Subsequently, results from statistical methods can be useful in providing evidence for rejecting/accepting null or alternative hypotheses. Referencing p-values generated from bootstrapping and setting a significance level prior, for example, provides justification for rejecting/accepting a null hypothesis based on a calculated sample. To improve accuracy, our group will analyze the influence of multiple predictor variables and whether statistical methods are statistically significant to reject the null hypothesis (assuming null hypothesis is true unless proven otherwise).
+As for the challenges we foresee in working with the data, it is essential that we process the data set in a manner that retains accuracy and improves clarity. When cleaning up column names and re-coding values, for example, it is crucial that cautionary measures are taken as to not delete or override data in a way that hinders the integrity of the original data set. Especially since our main outcome variable is represented by different units (ex. percent and Rate per 1,000), it is important to account for differences in observations to gather representative insights. When analyzing the data, furthermore, the influence of confounding variables when comparing predictors (ex. unaccounted influence of ethnicity when comparing CVD prevalence with age) presents a problem to the accuracy of our findings. As a result, it is important to analyze the influences of different variables and how they are useful in interpreting the context of the data and outcomes. Moreover, using statistical methods such as Bootstrapping, Regression Analysis/Fitting Linear Models, or Correlation Score will be helpful in answering the general research question in a more representative and logical manner. Using Bootstrapping as an approach, for example, can be useful in deriving confidence intervals and the distribution of proportions for simulated samples based on the original data. Subsequently, results from statistical methods can be useful in providing evidence for rejecting/accepting null or alternative hypotheses. Referencing p-values generated from bootstrapping and setting a significance level prior, for example, provides justification for rejecting/accepting a null hypothesis based on a calculated sample. To improve accuracy, our group will analyze the influence of multiple predictor variables and whether statistical methods are statistically significant to reject the null hypothesis (assuming null hypothesis is true unless proven otherwise).
 
 #### Preliminary Exploratory Data Analysis
 
@@ -122,6 +122,27 @@ gender_boxplot_rate
 In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value rate for males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for females.
 
 #### Eg. **Are males more susceptible to cardiovascular disease related hospitalizations?**
+
+```{r example-prelimiary-data-analysis}
+## Visualize the bootstrap distribution of difference in mean value between Males and Females
+## Set seed to 8253
+set.seed(8253)
+
+## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
+gender_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Male", "Female"))
+gender_boot_diff_mean
+
+## Visualize the bootstrap distribution of the different in mean value between Males and Females
+gender_boot_diff_mean %>% 
+  visualize()
+```
 
 ## Section 3 - Data
 
