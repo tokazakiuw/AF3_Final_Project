@@ -153,7 +153,7 @@ gender_boot_diff_mean %>%
             upper=quantile(stat, 0.975))
 ```
 
-Based on the histogram depicted above, the distribution and frequency of the bootstrapped proportion of the difference in mean value between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598.
+Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped proportion of the difference in mean value between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598.
 
 ## Section 3 - Data
 
