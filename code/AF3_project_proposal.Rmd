@@ -141,7 +141,16 @@ gender_boot_diff_mean
 
 ## Visualize the bootstrap distribution of the different in mean value between Males and Females
 gender_boot_diff_mean %>% 
-  visualize()
+  visualize()+
+  labs(title="1000 bootstraps of the difference of proportion",
+       y="count",
+       x="Bootstrapped difference of proportions in mean value between Males and Females")
+
+## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
+gender_boot_diff_mean %>% 
+  summarize(mean=mean(stat),
+            lower=quantile(stat, 0.025),
+            upper=quantile(stat, 0.975))
 ```
 
 ## Section 3 - Data
