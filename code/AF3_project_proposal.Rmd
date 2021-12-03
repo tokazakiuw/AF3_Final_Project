@@ -54,19 +54,6 @@ As for the challenges we foresee in working with the data, it is essential that 
 #### Preliminary Exploratory Data Analysis
 
 ```{r initial-statistics}
-## Summarize the mean, median, IQR, and sd by Age and Percentage
-gender_stats_percentage <- cms_data %>% 
-  filter(Break_Out_Category == "Age", Data_Value_Unit=="Percent (%)") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  group_by(Break_Out) %>% 
-  summarize(
-    mean_value = mean(Data_Value),
-    median_value = median(Data_Value),
-    iqr_value = IQR(Data_Value),
-    sd_value = sd(Data_Value)
-  )
-gender_stats_percentage
-
 ## Summarize the mean, median, IQR, and sd by Age and Rate
 gender_stats_rate <- cms_data %>% 
   filter(Break_Out_Category == "Age", Data_Value_Unit=="Rate per 1,000") %>% 
@@ -79,19 +66,6 @@ gender_stats_rate <- cms_data %>%
     sd_value = sd(Data_Value)
   )
 gender_stats_rate
-
-## Summarize the mean, median, IQR, and sd by Gender and Percentage
-gender_stats_percentage <- cms_data %>% 
-  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  group_by(Break_Out) %>% 
-  summarize(
-    mean_value = mean(Data_Value),
-    median_value = median(Data_Value),
-    iqr_value = IQR(Data_Value),
-    sd_value = sd(Data_Value)
-  )
-gender_stats_percentage
 
 ## Summarize the mean, median, IQR, and sd by Gender and Rate
 gender_stats_rate <- cms_data %>% 
@@ -106,19 +80,6 @@ gender_stats_rate <- cms_data %>%
   )
 gender_stats_rate
 
-## Summarize the mean, median, IQR, and sd by Race and Percentage
-race_stats_percentage <- cms_data %>% 
-  filter(Break_Out_Category == "Race", Data_Value_Unit=="Percent (%)") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  group_by(Break_Out) %>% 
-  summarize(
-    mean_value = mean(Data_Value),
-    median_value = median(Data_Value),
-    iqr_value = IQR(Data_Value),
-    sd_value = sd(Data_Value)
-  )
-race_stats_percentage
-
 ## Summarize the mean, median, IQR, and sd by Race and Rate
 race_stats_rate <- cms_data %>% 
   filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
@@ -131,8 +92,6 @@ race_stats_rate <- cms_data %>%
     sd_value = sd(Data_Value)
   )
 race_stats_rate
-
-##
 ```
 
 ```{r prelimiary-visualization}
