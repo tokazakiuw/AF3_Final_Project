@@ -121,6 +121,8 @@ gender_boxplot_rate
 
 In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value rate for males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for females.
 
+#### Eg. **Are males more susceptible to cardiovascular disease related hospitalizations?**
+
 ## Section 3 - Data
 
 #### Code Book
