@@ -56,7 +56,7 @@ As for the challenges we foresee in working with the data, it is essential that 
 ```{r initial-statistics}
 ## Summarize the mean, median, IQR, and sd by Age and Rate
 gender_stats_rate <- cms_data %>% 
-  filter(Break_Out_Category == "Age", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(Break_Out_Category == "Age", Data_Value_Unit=="Percent (%)") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
   group_by(Break_Out) %>% 
   summarize(
