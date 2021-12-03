@@ -8,6 +8,7 @@ output: openintro::lab_report
 ```{r load-packages, message=FALSE}
 library(tidyverse)
 library(openintro)
+library(infer)
 ```
 
 ```{r load-data, message=FALSE}
@@ -130,9 +131,11 @@ race_stats_rate <- cms_data %>%
     sd_value = sd(Data_Value)
   )
 race_stats_rate
+
+##
 ```
 
-```{r faceted-visualization}
+```{r prelimiary-visualization}
 ## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Rate
 faceted_plot_rate <- ggplot(data=cms_data %>% 
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000"),
@@ -178,6 +181,35 @@ gender_boxplot_percentage <- ggplot(data=cms_data %>%
                          x="Break_Out",
                          fill="Gender")
 gender_boxplot_percentage
+```
+
+```{r prelimiary-bootstrapping}
+## Bootstrap distribution of Males in this filtered data frame
+male_percentage_prop <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  count(Break_Out) %>% 
+  mutate(prop = n/sum(n)) %>% 
+  filter(Break_Out == "Male") %>% 
+  select(prop)
+male_percentage_prop
+
+## Set the seed to 8253
+set.seed(8253)
+
+## Calculate 1000 different resamples of data
+male_percent_null_dist <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  specify(response = Break_Out, success = "Male") %>% 
+  hypothesize(null = "point", p = 0.50) %>% 
+  generate(reps = 1000, type = "draw") %>% 
+  calculate(stat = "prop")
+male_percent_null_dist
+
+## Visualize the bootstrap distribution of Males in this filtered data frame
+male_percent_null_dist %>% 
+  visualize()
 ```
 
 In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value rate for males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for females.
