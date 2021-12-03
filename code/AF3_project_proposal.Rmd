@@ -119,35 +119,6 @@ gender_boxplot_rate <- ggplot(data=cms_data %>%
 gender_boxplot_rate
 ```
 
-```{r prelimiary-bootstrapping}
-## Bootstrap distribution of Males in this filtered data frame
-male_percentage_prop <- cms_data %>% 
-  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  count(Break_Out) %>% 
-  mutate(prop = n/sum(n)) %>% 
-  filter(Break_Out == "Male") %>% 
-  select(prop)
-male_percentage_prop
-
-## Set the seed to 8253
-set.seed(8253)
-
-## Calculate 1000 different resamples of data
-male_percent_null_dist <- cms_data %>% 
-  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Percent (%)") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  specify(response = Break_Out, success = "Male") %>% 
-  hypothesize(null = "point", p = 0.50) %>% 
-  generate(reps = 1000, type = "draw") %>% 
-  calculate(stat = "prop")
-male_percent_null_dist
-
-## Visualize the bootstrap distribution of Males in this filtered data frame
-male_percent_null_dist %>% 
-  visualize()
-```
-
 In the initial summary statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing female and male instances of CVD using Data_Value, for example, we see the median Data_Value rate for males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for females.
 
 ## Section 3 - Data
