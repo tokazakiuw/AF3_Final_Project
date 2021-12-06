@@ -15,7 +15,7 @@ library(infer)
 
 ### Analysis
 
-#### Part 1
+#### How is race related to Cardiovascular Disease and Hospitalizations?
 #### Part 2
 #### Part 3
 #### Part 4
