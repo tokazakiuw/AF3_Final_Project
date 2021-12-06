@@ -1,0 +1,24 @@
+---
+title: "Prevention is Better than Cure—Statistical Observations of Cardiovascular Disease Data"
+author: "Ty Kentaro Okazaki, Matthew R Herradura, David Xie, Carson Klein"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE}
+library(tidyverse)
+library(openintro)
+library(infer)
+```
+
+### Introduction
+
+### Analysis
+
+#### Part 1
+#### Part 2
+#### Part 3
+#### Part 4
+
+### Conclusion
+
