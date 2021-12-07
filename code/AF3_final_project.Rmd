@@ -5,13 +5,13 @@ date: "`r Sys.Date()`"
 output: openintro::lab_report
 ---
 
-```{r load-packages, message=FALSE}
+```{r load-packages, message=FALSE, echo=FALSE}
 library(tidyverse)
 library(openintro)
 library(infer)
 ```
 
-```{r load-data, message=FALSE}
+```{r load-data, message=FALSE, echo=FALSE}
 cms_data <- read.csv("../data/cms_data.csv")
 ```
 
