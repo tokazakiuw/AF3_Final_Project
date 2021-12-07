@@ -17,7 +17,7 @@ library(infer)
 
 #### How is race related to Cardiovascular Disease and Hospitalizations?
 #### Part 2
-#### Part 3
+#### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 #### Part 4
 
 ### Conclusion
