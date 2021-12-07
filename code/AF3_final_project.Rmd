@@ -105,9 +105,11 @@ A description of the variables is below:
 
 ## Analysis
 
+In this section, we will analyze the data to address various research questions
+
 #### How is race related to Cardiovascular Disease and Hospitalizations?
 
-#### 
+#### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
