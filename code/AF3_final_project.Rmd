@@ -113,7 +113,22 @@ In this section, we will analyze the data to address various research questions
 
 An initial summary and visualizations depicting the distribution of cardiovascular disease hospitalizations is shown below.
 
-```{r analysis-gender-1}
+```{r stat-analysis-gender-1}
+## Summarize the mean, median, IQR, and sd by Gender and Rate
+gender_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_rate
+```
+
+```{r visual-analysis-gender-1}
 faceted_gender_plot_rate <- ggplot(data=cms_data %>% 
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Gender"),
                         mapping=aes(x=Data_Value)) +
@@ -123,6 +138,20 @@ faceted_gender_plot_rate <- ggplot(data=cms_data %>%
                          subtitle="Faceted by Gender (Female vs. Male)",
                          x="Cardiovascular Disease related Hospitalizations")
 faceted_gender_plot_rate
+```
+
+```{r visual-analysis-gender-2}
+## Boxplot displaying relationship between gender and Data_Value for all observations (2004-2013) by Rate
+gender_boxplot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Gender", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot() +
+                    labs(title="Comparing relationship between Cardiovascular Disease related Hospitalizations and Gender",
+                         subtitle="All observed data from years: 2004-2013",
+                         y="Cardiovascular Disease related Hospitalizations",
+                         x="Gender",
+                         fill="Gender")
+gender_boxplot_rate
 ```
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
