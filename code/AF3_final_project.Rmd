@@ -111,9 +111,22 @@ In this section, we will analyze the data to address various research questions
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
+An initial summary and visualizations depicting the distribution of cardiovascular disease hospitalizations is shown below.
+
+```{r analysis-gender-1}
+faceted_gender_plot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Gender"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 6) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Cardiovascular Disease related Hospitalizations for all Years (2004-2013)",
+                         subtitle="Faceted by Gender (Female vs. Male)",
+                         x="Cardiovascular Disease related Hospitalizations")
+faceted_gender_plot_rate
+```
+
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
 ## Conclusion
-
