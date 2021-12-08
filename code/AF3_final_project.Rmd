@@ -16,16 +16,16 @@ cms_data <- read.csv("../data/cms_data.csv")
 
 cms_data <- cms_data %>%
 ## Drop Unnecessary Columns
-  select(-c("LocationDesc", "DataSource", "Category", "Data_Value_Type", "Data_Value_Alt", "Data_Value_Footnote_Symbol", "Data_Value_Footnote", "CategoryId", "TopicId", "IndicatorID", "Data_Value_TypeID", "BreakOutCategoryId", "BreakOutId")) %>% 
+  select(-c("LocationDesc", "DataSource", "Category", "Data_Value_Type", "Data_Value_Alt", "Data_Value_Footnote_Symbol", "Data_Value_Footnote", "CategoryId", "TopicId", "IndicatorID", "Data_Value_TypeID", "BreakOutCategoryId", "BreakOutId"))
 ```
 
 ## Introduction
 
 Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease?
 
-Null Hypothesis: Predictor variables such as age, gender, and ethnicity will have no influence on a patient's susceptibility for developing cardiovascular disease.
+[Motivate why topic is interesting and important]
 
-Alternative Hypothesis: Predictor variables such as age, gender, and ethnicity will influence a patient's susceptibility for developing cardiovascular disease.
+[Research questions you will be investigating]
 
 #### Code Book
 
@@ -45,67 +45,41 @@ glimpse(cms_data)
 
 A description of the variables is below:
 
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| Variable Name                | Description                                                                                                   | Data Type  |
-+==============================+===============================================================================================================+============+
-| `Year`                       | Year                                                                                                          | Number     |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `LocationAbbr`               | Location abbreviation                                                                                         | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `LocationDesc`               | Location description                                                                                          | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `DataSource`                 | Abbreviation of data source                                                                                   | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `PriorityArea1`              | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `PriorityArea2`              | Priority Area (ABCS or None)                                                                                  | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `PriorityArea3`              | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `PriorityArea4`              | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Category`                   | Category description                                                                                          | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Topic`                      | Topic description                                                                                             | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Indicator`                  | Indicator description                                                                                         | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_Type`            | Data Value Type (mean, rate, percentage)                                                                      | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_Unit`            | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value`                 | Data value (point estimate)                                                                                   | Number     |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_Alt`             | Equal to data value, but formatting is numeric                                                                | Number     |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_Footnote_Symbol` | Symbol that would be used to flag footnotes                                                                   | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_Footnote`        | Footnote description                                                                                          | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `LowConfidenceLimit`         | 95% confidence interval lower bound                                                                           | Number     |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `HighConfidenceLimit`        | 95% confidence interval upper bound                                                                           | Number     |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Break_Out_Category`         | Break out category description                                                                                | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Break_Out`                  | Break out group description                                                                                   | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `CategoryId`                 | Category lookup value                                                                                         | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `TopicId`                    | Topic lookup value                                                                                            | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `IndicatorId`                | Indicator lookup value                                                                                        | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `Data_Value_TypeID`          | Data value type lookup value                                                                                  | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `BreakOutCategoryId`         | Break out category lookup value                                                                               | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `BreakOutId`                 | Break out group lookup value                                                                                  | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `LocationId`                 | Location lookup value                                                                                         | Plain Text |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
-| `GeoLocation`                | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
-+------------------------------+---------------------------------------------------------------------------------------------------------------+------------+
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| Variable Name         | Description                                                                                                   | Data Type  |
++=======================+===============================================================================================================+============+
+| `Year`                | Year                                                                                                          | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Topic`               | Topic description                                                                                             | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Indicator`           | Indicator description                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out`           | Break out group description                                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationId`          | Location lookup value                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 
 ## Analysis
 
@@ -138,9 +112,9 @@ faceted_gender_plot_rate <- ggplot(data=cms_data %>%
                         mapping=aes(x=Data_Value)) +
                     geom_histogram(binwidth = 6) +
                       facet_wrap(~Break_Out) +
-                    labs(title="Distribution of Cardiovascular Disease related Hospitalizations for all Years (2004-2013)",
+                    labs(title="Distribution of Hospitalizations with Heart Failure as the Principal Diagnosis for all Years (2004-2013)",
                          subtitle="Faceted by Gender (Female vs. Male)",
-                         x="Cardiovascular Disease related Hospitalizations")
+                         x="Hospitalizations with Heart Failure as the Principal Diagnosis")
 faceted_gender_plot_rate
 ```
 
@@ -150,9 +124,9 @@ gender_boxplot_rate <- ggplot(data=cms_data %>%
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Gender", Data_Value_Unit=="Rate per 1,000"),
                         mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
                     geom_boxplot() +
-                    labs(title="Comparing relationship between Cardiovascular Disease related Hospitalizations and Gender",
+                    labs(title="Comparing relationship between Hospitalizations with Heart Failure as the Principal Diagnosis and Gender",
                          subtitle="All observed data from years: 2004-2013",
-                         y="Cardiovascular Disease related Hospitalizations",
+                         y="Hospitalizations with Heart Failure as the Principal Diagnosis",
                          x="Gender",
                          fill="Gender")
 gender_boxplot_rate
@@ -160,7 +134,7 @@ gender_boxplot_rate
 
 Based on these statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing Female and Male instances of CVD hospitalizations using Data_Value, for example, we see the median Data_Value rate for Males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for Females. Consequently, we can ask and answer the following research question using statistical analysis:
 
-**Are males more susceptible to cardiovascular disease related hospitalizations?**
+**Are Males more Susceptible (in comparison to Females) to Hospitalizations with Heart Failure as the Principal Diagnosis?**
 
 **Null Hypothesis**: Gender has no influence on a patient's susceptibility for cardiovascular disease related hospitalizations.
 
