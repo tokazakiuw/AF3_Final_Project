@@ -13,6 +13,10 @@ library(infer)
 
 ```{r load-data, message=FALSE, echo=FALSE}
 cms_data <- read.csv("../data/cms_data.csv")
+
+cms_data <- cms_data %>%
+## Drop Unnecessary Columns
+  select(-c("LocationDesc", "DataSource", "Category", "Data_Value_Type", "Data_Value_Alt", "Data_Value_Footnote_Symbol", "Data_Value_Footnote", "CategoryId", "TopicId", "IndicatorID", "Data_Value_TypeID", "BreakOutCategoryId", "BreakOutId")) %>% 
 ```
 
 ## Introduction
@@ -27,11 +31,11 @@ Alternative Hypothesis: Predictor variables such as age, gender, and ethnicity w
 
 This data set includes instances of cardiovascular disease (CVD), potential indicators, and associated risk factors for Medicare and Medicaid patients across the United States.
 
-Dimensions of the `cms_data` data frame.
+Dimensions of the `cms_data` data frame (after cleaning).
 
 -   Rows/Observations: 42,640
 
--   Columns/Variables: 29
+-   Columns/Variables: 16
 
 Print the output of `glimpse` of data frame: `cms_data`
 
