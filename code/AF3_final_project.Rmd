@@ -86,6 +86,15 @@ A description of the variables is below:
 In this section, we will analyze the data to address various research questions
 
 #### How is race related to Cardiovascular Disease and Hospitalizations?
+```{r race-analysis, echo=FALSE}
+# filter categories for race 
+# filter for NA values
+race_data <- cms_data %>%
+  filter(Break_Out_Category == "Race") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value))
+  
+
+```
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
