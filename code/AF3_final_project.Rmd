@@ -154,6 +154,8 @@ gender_boxplot_rate <- ggplot(data=cms_data %>%
 gender_boxplot_rate
 ```
 
+Based on these statistics and visualizations depicted above,
+
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
