@@ -25,6 +25,10 @@ Using data gathered from Medicare and Medicaid patients, the Center for Medicare
 
 [Motivate why topic is interesting and important]
 
+```{r introduction-visualization}
+
+```
+
 [Research questions you will be investigating]
 
 #### Code Book
