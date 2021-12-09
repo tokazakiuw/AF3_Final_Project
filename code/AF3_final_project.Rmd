@@ -247,5 +247,44 @@ Based on the initial histogram depicted above, the distribution and frequency of
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
+Data set
+```{r summarise-data-age-percentage, echo=FALSE}
+## A general analysis and data clean up for comparing relatinship between age and
+## Cardiovascular Diseases and Hospitalizations.
+age_only <- cms_data %>% 
+  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
+  group_by(Topic, Break_Out) %>% 
+  summarise(mean_percentage = mean(Data_Value),
+            median_percentage = median(Data_Value),
+            max_percentage = max(Data_Value),
+            min_percentage = min(Data_Value),
+            sd_percentage = sd(Data_Value),
+            iqr_percentage = IQR(Data_Value)) %>% 
+  rename(Age = "Break_Out") %>% 
+  arrange(Age)
+glimpse(age_only)
+```
+
+Graph 
+```{r topic-vs-age-graph, echo=FALSE}
+ggplot(data = age_only, 
+       mapping = aes(x = Age, y = mean_percentage, fill = Age)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  facet_wrap(~ Topic) +
+  labs(title = "Mean percentage between different ages",
+       subtitle = "among different type of heart diseases")
+```
+
+From the graphs, we can see that the difference between each age group are really small for different type of cardiovascular disease, so it will be more appropriate if using permutation, because this method will be focused on discovering if there is an relationship between age and cardiovascular diseases. 
+
+```{r linear-modeling, echo=FALSE}
+model1 <- lm(Data_Value ~ Topic, data = cms_data)
+tidy(model1)
+
+rsquared <- glance(model1) %>% 
+  select(r.squared, adj.r.squared)
+rsquared
+```
+
 
 ## Conclusion
