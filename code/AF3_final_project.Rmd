@@ -120,6 +120,12 @@ instances <- cms_data %>%
   count(Break_Out)
 
 instances
+
+
+ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Race", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot()
 ```
 
 ```{r race-hist, echo=FALSE}
@@ -133,8 +139,9 @@ ggplot(data=cms_data %>%
                     geom_histogram(binwidth = 6) +
                       facet_wrap(~Break_Out) 
 
-
 ```
+
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. 
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
