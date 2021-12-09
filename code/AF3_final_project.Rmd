@@ -155,7 +155,7 @@ ggplot(data=cms_data %>%
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. 
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States.
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
@@ -226,7 +226,7 @@ gender_boot_diff_mean <- cms_data %>%
   generate(reps = 1000, type = "bootstrap") %>%
   calculate(stat = "diff in means",
   order=c("Male", "Female"))
-gender_boot_diff_mean
+head(gender_boot_diff_mean)
 
 ## Visualize the bootstrap distribution of the different in mean value between Males and Females
 gender_boot_diff_mean %>% 
