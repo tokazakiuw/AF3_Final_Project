@@ -114,9 +114,11 @@ In this section, we will analyze the data to address various research questions
 
 #### How is race related to Cardiovascular Disease and Hospitalizations?
 
-```{r race-analysis, echo=FALSE}
+```{r race-initial-analysis, echo=FALSE}
 # filter categories for race 
 # filter for NA values
+
+# get race data and averages for cardiovascular hospitalizations
 race_data <- cms_data %>%
   filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
@@ -125,16 +127,19 @@ race_data <- cms_data %>%
     mean_value = mean(Data_Value),
     median_value = median(Data_Value),
     iqr_value = IQR(Data_Value),
-    sd_value = sd(Data_Value)
+    sd_value = sd(Data_Value),
+    #topic = count(Topic)
   )
 
+location_data <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
+  #group_by(Break_Out) %>%
+  count(LocationAbbr, Break_Out) 
+  
+
+location_data
 race_data
-
-instances <- cms_data %>%
-  filter(Break_Out_Category == "Race") %>%
-  count(Break_Out)
-
-instances
 
 
 ggplot(data=cms_data %>% 
@@ -157,6 +162,17 @@ ggplot(data=cms_data %>%
 ```
 
 From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States.
+
+```{r race-analysis, echo = FALSE}
+avg_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
+  group_by(LocationAbbr, Break_Out) %>%
+  summarize(mean = mean(Data_Value),
+            median = median(Data_Value))
+  
+avg_mean
+```
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
