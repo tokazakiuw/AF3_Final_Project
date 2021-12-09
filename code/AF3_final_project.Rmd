@@ -90,9 +90,36 @@ In this section, we will analyze the data to address various research questions
 # filter categories for race 
 # filter for NA values
 race_data <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
+  group_by(Break_Out) %>%
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+
+race_data
+
+instances <- cms_data %>%
   filter(Break_Out_Category == "Race") %>%
-  filter(!is.na(Break_Out), !is.na(Data_Value))
-  
+  count(Break_Out)
+
+instances
+```
+
+```{r race-hist, echo=FALSE}
+ggplot(race_data, aes(x = Break_Out, y = mean_value)) + 
+  geom_bar(stat = "identity")
+
+
+
+ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Race"), mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 6) +
+                      facet_wrap(~Break_Out) 
+
 
 ```
 
