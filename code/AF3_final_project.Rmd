@@ -25,6 +25,19 @@ Using data gathered from Medicare and Medicaid patients, the Center for Medicare
 
 [Motivate why topic is interesting and important]
 
+```{r introduction-stats}
+## Summarize the mean and median value by Year and Percent
+year_stats_percent <- cms_data %>% 
+  filter(Data_Value_Unit=="Percent (%)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Year) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+  )
+year_stats_percent
+```
+
 [Research questions you will be investigating]
 
 #### Code Book
