@@ -28,7 +28,7 @@ Using data gathered from Medicare and Medicaid patients, the Center for Medicare
 ```{r introduction-stats}
 ## Summarize the mean and median value by Year and Percent
 year_stats_percent <- cms_data %>% 
-  filter(Data_Value_Unit=="Percent (%)") %>% 
+  filter(Data_Value_Unit=="Percent (%)", Indicator=="Prevalence of major cardiovascular disease hospitalizations among all hospitalizations, US Medicare FFS beneficiaries (65+)") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
   group_by(Year) %>% 
   summarize(
@@ -36,6 +36,10 @@ year_stats_percent <- cms_data %>%
     median_value = median(Data_Value),
   )
 year_stats_percent
+```
+
+```{r introduction-visualization}
+
 ```
 
 [Research questions you will be investigating]
