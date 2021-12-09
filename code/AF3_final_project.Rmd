@@ -26,16 +26,29 @@ Using data gathered from Medicare and Medicaid patients, the Center for Medicare
 [Motivate why topic is interesting and important]
 
 ```{r introduction-stats}
-## Summarize the mean and median value by Year and Percent
-year_stats_percent <- cms_data %>% 
-  filter(Data_Value_Unit=="Percent (%)") %>% 
+## Summarize the mean and median value by Predictor Variables and Percent
+variable_stats_percent <- cms_data %>% 
+  filter(Data_Value_Unit=="Percent (%)", Indicator=="Prevalence of major cardiovascular disease hospitalizations among all hospitalizations, US Medicare FFS beneficiaries (65+)") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  group_by(Year) %>% 
+  group_by(Break_Out) %>% 
   summarize(
     mean_value = mean(Data_Value),
     median_value = median(Data_Value),
   )
-year_stats_percent
+variable_stats_percent
+```
+
+```{r introduction-visualization}
+## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Rate
+faceted_plot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<40, Data_Value_Unit=="Percent (%)"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 2) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Data_Value for all Years (2004-2013)",
+                         subtitle="Faceted by Break_Out (various predictor variables)",
+                         x="Data_Value")
+faceted_plot_rate
 ```
 
 [Research questions you will be investigating]
@@ -99,6 +112,7 @@ A description of the variables is below:
 In this section, we will analyze the data to address various research questions
 
 #### How is race related to Cardiovascular Disease and Hospitalizations?
+
 ```{r race-analysis, echo=FALSE}
 # filter categories for race 
 # filter for NA values
