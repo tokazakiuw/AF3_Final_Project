@@ -262,7 +262,7 @@ gender_boot_diff_mean %>%
   shade_p_value(obs_stat=gender_ci$upper, direction="both")
 ```
 
-Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped difference in mean values between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagonosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598.
+Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped difference in mean values between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598).
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
