@@ -309,7 +309,13 @@ prop_gender_high_rates <- gender_high_rates %>%
   )
 prop_gender_high_rates
 
-## Get the observed difference of proportion of yes to high rates of heart failure hospitalizations based on Gender
+## Get the observed difference of proportion of yes to high rates of heart failure hospitalizations for Males - Females
+obs_diff <- prop_gender_high_rates %>% 
+  select(prop_yes) %>% 
+  summarize(obs_diff=max(prop_yes) - min(prop_yes)) %>% 
+  select(obs_diff) %>% 
+  unlist()
+obs_diff
 ```
 
 In this analysis, statistical methods and \_\_
@@ -320,18 +326,16 @@ In this analysis, statistical methods and \_\_
 set.seed(2364)
 
 ## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
-gender_high_boot_diff_prop <- cms_data %>%
-  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  filter(Data_Value > 23) %>% 
-  specify(response = Break_Out, success = "Male") %>%
-  hypothesize(null = "point", p = 0) %>% 
-  generate(reps = 1000, type = "draw") %>%
-  calculate(stat = "prop")
+gender_high_boot_diff_prop <- gender_high_rates %>%
+  specify(High_Rate ~ Break_Out, success = "yes") %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 5000, type = "permute") %>%
+  calculate(stat = "diff in props",
+            order=c("Male", "Female"))
 head(gender_high_boot_diff_prop)
 
 ## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
-gender_high_ci <- gender_boot_diff_mean %>% 
+gender_high_ci <- gender_high_boot_diff_prop %>% 
   summarize(mean=mean(stat),
             lower=quantile(stat, 0.025),
             upper=quantile(stat, 0.975))
@@ -344,7 +348,7 @@ gender_high_boot_diff_prop %>%
        subtitle="95% confidence interval",
        y="count",
        x="Bootstrapped difference in proportion between Males and Females for high rates of heart failure hospitalizations") +
-  shade_p_value(obs_stat=0, direction="both")
+  shade_p_value(obs_stat=obs_diff, direction="greater")
 ```
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
