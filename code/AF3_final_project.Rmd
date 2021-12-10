@@ -143,7 +143,7 @@ ggplot(data=cms_data %>%
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States.
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. 
 
 ```{r race-analysis, echo = FALSE}
 avg_mean <- cms_data %>%
@@ -154,6 +154,14 @@ avg_mean <- cms_data %>%
             median = median(Data_Value))
   
 avg_mean
+
+west_coast <- avg_mean %>%
+  filter(LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA"))
+west_coast
+
+south_states <- avg_mean %>%
+  filter(LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK"))
+south_states
 ```
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
