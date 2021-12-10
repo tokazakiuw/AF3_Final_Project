@@ -400,7 +400,8 @@ ggplot(data = age_comparison,
        mapping = aes(x = Age, y = Data_Value, fill = Age)) +
   geom_boxplot() +
   facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
-  labs(title = "")
+  labs(title = "Percentage of different diseases across different age group",
+       y = "Percentage")
 ```
 
 From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+, from this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+, so in this sense, the age group of 75+ generally have more higher percentage samples than the group of age 65+, except for Coronary Heart Disease, the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the agr group of 65+.
@@ -427,4 +428,4 @@ The adjusted r squared for this model is `r rsquared`, in this case, about 96.8%
 
 ## Conclusion
 Age:
-Since the linear model 
+Since the r squared of the linear model shows that our linear model is significant, and from the linear model, we can tell that different types of diseases have their impact on the percentage of the people, however, comparing with all the diseases, the impact of the age on the percentage of people having the diseases will be relatively insignificant than the others, in this data set, it will be between age group of 65+ and 75+. However, even though it shows that there isn't a strong relationship between age and cardiovascular diseases, there are not other samples from other age groups other than age of 65+ and 75+ to tell us the difference. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and cardiovascular diseases and hospitalizations.
