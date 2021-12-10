@@ -268,10 +268,10 @@ Based on the initial histogram depicted above, the distribution and frequency of
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
-Data set
+Here is an starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
 ```{r summarise-data-age-percentage, echo=FALSE}
-## A general analysis and data clean up for comparing relatinship between age and
+## A general analysis and data clean up for comparing relationship between age and
 ## Cardiovascular Diseases and Hospitalizations.
 age_only <- cms_data %>% 
   filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
@@ -287,26 +287,38 @@ age_only <- cms_data %>%
 glimpse(age_only)
 ```
 
-Graph
+```{r topic-vs-age-box-plot, echo=FALSE}
+## New facet label names for diseases
+diseases_label <- c("Heart Attack", "Coronary Heart Disease", "Heart Disease", 
+    "Heart Failure", "Major Cardiovascular Disease",
+    "Stroke")
+names(diseases_label) <- c("Acute Myocardial Infarction (Heart Attack)", "Coronary Heart Disease",
+                     "Diseases of the Heart (Heart Disease)", "Heart Failure",
+                     "Major Cardiovascular Disease", "Stroke")
 
-```{r topic-vs-age-graph, echo=FALSE}
-ggplot(data = age_only, 
-       mapping = aes(x = Age, y = mean_percentage, fill = Age)) +
-  geom_bar(position = "dodge", stat = "identity") +
-  facet_wrap(~ Topic) +
-  labs(title = "Mean percentage between different ages",
-       subtitle = "among different type of heart diseases")
+ggplot(data = cms_data %>% 
+         filter(!is.na(Data_Value), Break_Out_Category == "Age") %>% 
+         rename(Age = "Break_Out"),
+       mapping = aes(x = Age, y = Data_Value, fill = Age)) +
+  geom_boxplot() +
+  facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
+  labs(title = "")
 ```
 
-From the graphs, we can see that the difference between each age group are really small for different type of cardiovascular disease, so it will be more appropriate if using permutation, because this method will be focused on discovering if there is an relationship between age and cardiovascular diseases.
+From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. 
 
 ```{r linear-modeling, echo=FALSE}
+## Set up a linear model to compare relationship
 model1 <- lm(Data_Value ~ Topic, data = cms_data)
 tidy(model1)
 
+## Calculate the r.squared
 rsquared <- glance(model1) %>% 
-  select(r.squared, adj.r.squared)
+  select(adj.r.squared) %>% 
+  pull()
 rsquared
 ```
+
+
 
 ## Conclusion
