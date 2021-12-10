@@ -161,7 +161,7 @@ ggplot(data=cms_data %>%
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. 
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States.
 
 ```{r race-analysis, echo = FALSE}
 avg_mean <- cms_data %>%
@@ -239,14 +239,6 @@ gender_boxplot_rate
 
 Based on these statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing Female and Male rates of Heart Failure hospitalizations using Data_Value, for example, we see the median Data_Value rate for Males is slightly higher on average with a value of 21.00 when compared to a median Data_Value rate of 17.65 for Females; furthermore, the mean Data_Value rate for Males is around 24.95, and 20.60 for Females. Consequently, we can ask and answer the following research question using statistical analysis:
 
-**Are Males more Susceptible (in comparison to Females) to Hospitalizations with Heart Failure as the Principal Diagnosis?**
-
-**Null Hypothesis**: Gender has no influence on a patient's susceptibility for cardiovascular disease related hospitalizations.
-
-**Alternative Hypothesis**: Gender will influence a patient's susceptibility for cardiovascular disease related hospitalizations. Specifically, Males will be adversely impacted by cardiovascular disease related hospitalizations in proportion to Females.
-
-In this analysis \_\_
-
 ```{r gender-statistical analysis, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
 ## Set seed to 8253
@@ -282,10 +274,45 @@ gender_boot_diff_mean %>%
 
 Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped difference in mean values between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598).
 
+**Are Males more Susceptible (in comparison to Females) to High Rates of Hospitalizations with Heart Failure as the Principal Diagnosis?**
+
+**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of cardiovascular disease related hospitalizations.
+
+**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. Specifically, Males will be adversely impacted by high rates of cardiovascular disease related hospitalizations in proportion to Females.
+
+In this analysis \_\_
+
 ```{r gender-statistical analysis, echo=FALSE}
-## Get p-value for bootstrap distribution of difference in mean value between Males and Females
+## Visualize the bootstrap distribution of difference in mean value between Males and Females
+## Set seed to 2364
+set.seed(2364)
+
+## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
+gender_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Male", "Female"))
+head(gender_boot_diff_mean)
+
+## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
+gender_ci <- gender_boot_diff_mean %>% 
+  summarize(mean=mean(stat),
+            lower=quantile(stat, 0.025),
+            upper=quantile(stat, 0.975))
+gender_ci
+
+## Visualize the bootstrap distribution of the difference in mean value between Males and Females
 gender_boot_diff_mean %>% 
-  get_p_value(obs_stat=0, direction="both")
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Males and Females") +
+  shade_p_value(obs_stat=gender_ci$upper, direction="both")
 ```
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
@@ -329,7 +356,7 @@ ggplot(data = cms_data %>%
   labs(title = "")
 ```
 
-From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. 
+From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases.
 
 ```{r linear-modeling, echo=FALSE}
 ## Set up a linear model to compare relationship
@@ -342,7 +369,5 @@ rsquared <- glance(model1) %>%
   pull()
 rsquared
 ```
-
-
 
 ## Conclusion
