@@ -239,7 +239,7 @@ gender_boxplot_rate
 
 Based on these initial statistics and visualizations depicted above, associations between heart failure hospitalizations and Gender can be observed. When observing the box plot visualization comparing Female and Male rates of heart failure hospitalizations using `Data_Value`, for example, we see the median `Data_Value` rate for Males is slightly higher on average with a value of 21.00 when compared to a median rate of 17.65 for Females; furthermore, the mean `Data_Value` rate for Males is around 24.95, and 20.60 for Females.
 
-```{r gender-statistical analysis, echo=FALSE}
+```{r gender-difference-in-mean analysis, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
 ## Set seed to 8253
 set.seed(8253)
@@ -278,16 +278,58 @@ Consequently, we can specify our general research question by asking and answeri
 
 **Are Males more Susceptible (in comparison to Females) to High Rates of Hospitalizations with Heart Failure as the Principal Diagnosis?**
 
-**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of cardiovascular disease related hospitalizations.
+**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. The difference in proportion for high rates of heart failure related hospitalizations between Males and Females equals zero.
 
-**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. Specifically, Males will be adversely impacted by high rates of cardiovascular disease related hospitalizations in proportion to Females.
+**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. Specifically, Males will be adversely impacted by high rates of cardiovascular disease related hospitalizations in proportion to Females. The difference in proportion in high rates of heart failure related hospitalizations between Males and Females is greater than 0.
+
+```{r gender-statistical-analysis-setup, echo=FALSE}
+## Filter data frame by Gender and high rates of heart failure hospitalizations
+gender_high_rates <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Data_Value > 23)
+
+## Count observations in filtered data frame
+gender_high_rates %>% 
+  count()
+
+## Assign null difference in proportion
+obs_diff <- 0
+```
 
 In this analysis, statistical methods and \_\_
 
-```{r gender-statistical analysis2, echo=FALSE}
+```{r gender-statistical-setup, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
 ## Set seed to 2364
 set.seed(2364)
+
+## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
+gender_high_boot_diff_prop <- cms_data %>%
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  specify(Data_Value ~ Break_Out, success="Male") %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>%
+  calculate(stat = "diff in means",
+  order=c("Male", "Female"))
+head(gender_high_boot_diff_prop)
+
+## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
+gender_high_ci <- gender_boot_diff_mean %>% 
+  summarize(mean=mean(stat),
+            lower=quantile(stat, 0.025),
+            upper=quantile(stat, 0.975))
+gender_high_ci
+
+## Visualize the bootstrap distribution of the difference in mean value between Males and Females
+gender_high_boot_diff_prop %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in proportions",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in proportion between Males and Females for high rates of heart failure hospitalizations") +
+  shade_p_value(obs_stat=0, direction="both")
 ```
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
