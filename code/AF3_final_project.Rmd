@@ -422,6 +422,6 @@ rsquared <- glance(model1) %>%
 rsquared
 ```
 
-The adjusted r squared for this model is `r rsquared`, in this case, about 31.6% of the data from age and cardiovascular heart diseases is explained by the linear model.
+The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
 
 ## Conclusion
