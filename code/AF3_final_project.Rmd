@@ -357,53 +357,66 @@ gender_high_boot_diff_prop %>%
 
 Here is an starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
-```{r summarise-data-age-percentage, echo=FALSE}
+```{r data-preparation, echo=FALSE}
+age_comparison <- cms_data %>% 
+  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
+  rename(Age = "Break_Out")
+```
+
+```{r general-summary, echo=FALSE}
 ## A general analysis and data clean up for comparing relationship between age and
 ## Cardiovascular Diseases and Hospitalizations.
-age_only <- cms_data %>% 
-  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
-  group_by(Topic, Break_Out) %>% 
+age_only <- age_comparison %>% 
+  group_by(Topic, Age) %>% 
   summarise(mean_percentage = mean(Data_Value),
             median_percentage = median(Data_Value),
             max_percentage = max(Data_Value),
             min_percentage = min(Data_Value),
             sd_percentage = sd(Data_Value),
             iqr_percentage = IQR(Data_Value)) %>% 
-  rename(Age = "Break_Out") %>% 
   arrange(Age)
 glimpse(age_only)
 ```
 
+From looking between the mean and median for each disease topic and from two age groups, all of the mean and median don't have a significant difference, so it means in the sample it does not have many outliers for the cardiovascular diseases in the data set. However, in age group 65+, with Major Cardiovascular Diseases, have the greatest standard deviation and IQR among other diseases in all age group, so it means for this disease, its sample is more spread out than the other diseases. 
+
 ```{r topic-vs-age-box-plot, echo=FALSE}
 ## New facet label names for diseases
-diseases_label <- c("Heart Attack", "Coronary Heart Disease", "Heart Disease", 
+diseases_label <- c("Acute Myocardial Infarction", "Coronary Heart Disease", "Heart Disease", 
     "Heart Failure", "Major Cardiovascular Disease",
     "Stroke")
 names(diseases_label) <- c("Acute Myocardial Infarction (Heart Attack)", "Coronary Heart Disease",
                      "Diseases of the Heart (Heart Disease)", "Heart Failure",
                      "Major Cardiovascular Disease", "Stroke")
 
-ggplot(data = cms_data %>% 
-         filter(!is.na(Data_Value), Break_Out_Category == "Age") %>% 
-         rename(Age = "Break_Out"),
+## Box plot for age and disease comparison
+ggplot(data = age_comparison,
        mapping = aes(x = Age, y = Data_Value, fill = Age)) +
   geom_boxplot() +
   facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
   labs(title = "")
 ```
 
-From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases.
+From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+, from this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+, so in this sense, the age group of 75+ generally have more higher percentage samples than the group of age 65+, except for Coronary Heart Disease, the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the agr group of 65+.
 
 ```{r linear-modeling, echo=FALSE}
 ## Set up a linear model to compare relationship
-model1 <- lm(Data_Value ~ Topic, data = cms_data)
+model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
+```
+Linear model for age and cardiovascular disease: 
+_Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease * 3.906 + Diseases of the Heart * 15.069 + Heart Failure * 2.067 + Major Cardiovascular Disease * 20.930 + Stroke * 0.885 + Age 75+ * 0.488_
 
+The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
+
+```{r adjusted-r-squared, echo=FALSE}
 ## Calculate the r.squared
 rsquared <- glance(model1) %>% 
   select(adj.r.squared) %>% 
   pull()
 rsquared
 ```
+
+The adjusted r squared for this model is `r rsquared`, in this case, about 31.6% of the data from age and cardiovascular heart diseases is explained by the linear model. 
 
 ## Conclusion
