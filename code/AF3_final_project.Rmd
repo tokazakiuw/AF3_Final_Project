@@ -237,7 +237,7 @@ gender_boxplot_rate <- ggplot(data=cms_data %>%
 gender_boxplot_rate
 ```
 
-Based on these initial statistics and visualizations depicted above, associations between heart failure hospitalizations and Gender can be observed. When observing the box plot visualization comparing Female and Male rates of Heart Failure hospitalizations using `Data_Value`, for example, we see the median `Data_Value` rate for Males is slightly higher on average with a value of 21.00 when compared to a median rate of 17.65 for Females; furthermore, the mean `Data_Value` rate for Males is around 24.95, and 20.60 for Females.
+Based on these initial statistics and visualizations depicted above, associations between heart failure hospitalizations and Gender can be observed. When observing the box plot visualization comparing Female and Male rates of heart failure hospitalizations using `Data_Value`, for example, we see the median `Data_Value` rate for Males is slightly higher on average with a value of 21.00 when compared to a median rate of 17.65 for Females; furthermore, the mean `Data_Value` rate for Males is around 24.95, and 20.60 for Females.
 
 ```{r gender-statistical analysis, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
@@ -272,7 +272,7 @@ gender_boot_diff_mean %>%
   shade_p_value(obs_stat=gender_ci$upper, direction="both")
 ```
 
-To further analyze the disparity in the mean hospitalization rates, the distribution and frequency of the bootstrapped difference in mean `Data_Value` between Males and Females can be visualized above. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598). From the collective statistics and visualizations illustrating a potential relationship of
+To further analyze the disparity in the mean hospitalization rates, the distribution and frequency of the bootstrapped difference in mean `Data_Value` between Males and Females can be visualized above. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598). From the collective statistics and visualizations illustrating the relationship between heart failure hospitalizations and gender, observations can be made about the high hospitalization rates for Males in respect to Females.
 
 Consequently, we can specify our general research question by asking and answering the following:
 
