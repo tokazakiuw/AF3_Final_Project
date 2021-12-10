@@ -18,6 +18,8 @@ cms_data <- read.csv("../data/cms_data.csv")
 cms_data <- cms_data %>%
 ## Drop Unnecessary Columns
   select(-c("LocationDesc", "DataSource", "Category", "Data_Value_Type", "Data_Value_Alt", "Data_Value_Footnote_Symbol", "Data_Value_Footnote", "CategoryId", "TopicId", "IndicatorID", "Data_Value_TypeID", "BreakOutCategoryId", "BreakOutId"))
+
+cms_data$Data_Value <- as.numeric(cms_data$Data_Value)
 ```
 
 ## Introduction
@@ -278,9 +280,9 @@ Consequently, we can specify our general research question by asking and answeri
 
 **Are Males more Susceptible (in comparison to Females) to High Rates of Hospitalizations with Heart Failure as the Principal Diagnosis?**
 
-**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. The difference in proportion for high rates of heart failure related hospitalizations between Males and Females equals zero.
+**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. The proportion between Genders for high rates of heart failure related hospitalizations are equal (proportion Male=proportion Female; 0.5=0.5) .
 
-**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of cardiovascular disease related hospitalizations. Specifically, Males will be adversely impacted by high rates of cardiovascular disease related hospitalizations in proportion to Females. The difference in proportion in high rates of heart failure related hospitalizations between Males and Females is greater than 0.
+**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, Males will be adversely impacted by high rates of heart failure related hospitalizations in proportion to Females. The proportion of Males for high rates of heart failure related hospitalizations are greater than Females (proportion Male\>proportion Female).
 
 ```{r gender-statistical-analysis-setup, echo=FALSE}
 ## Filter data frame by Gender and high rates of heart failure hospitalizations
@@ -308,11 +310,11 @@ set.seed(2364)
 gender_high_boot_diff_prop <- cms_data %>%
   filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  specify(Data_Value ~ Break_Out, success="Male") %>%
-  hypothesize(null = "independence") %>% 
-  generate(reps = 1000, type = "permute") %>%
-  calculate(stat = "diff in means",
-  order=c("Male", "Female"))
+  filter(Data_Value > 23) %>% 
+  specify(response = Break_Out) %>%
+  hypothesize(null = "point", p = 0) %>% 
+  generate(reps = 1000, type = "draw") %>%
+  calculate(stat = "prop")
 head(gender_high_boot_diff_prop)
 
 ## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
