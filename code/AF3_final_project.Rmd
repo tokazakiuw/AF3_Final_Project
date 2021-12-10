@@ -9,6 +9,7 @@ output: openintro::lab_report
 library(tidyverse)
 library(openintro)
 library(infer)
+library(broom)
 ```
 
 ```{r load-data, message=FALSE, echo=FALSE}
@@ -71,24 +72,41 @@ glimpse(cms_data)
 
 A description of the variables is below:
 
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | Variable Name         | Description                                                                                                   | Data Type  |
-|-----------------------|---------------------------------------------------------------------------------------------------------------|------------|
++=======================+===============================================================================================================+============+
 | `Year`                | Year                                                                                                          | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Topic`               | Topic description                                                                                             | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Indicator`           | Indicator description                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out`           | Break out group description                                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationId`          | Location lookup value                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 
 ## Analysis
 
@@ -209,7 +227,7 @@ gender_boxplot_rate <- ggplot(data=cms_data %>%
 gender_boxplot_rate
 ```
 
-Based on these statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing Female and Male instances of CVD hospitalizations using Data_Value, for example, we see the median Data_Value rate for Males is slightly higher on average with a value of 17.65 when compared to a median Data_Value rate of 21.00 for Females. Consequently, we can ask and answer the following research question using statistical analysis:
+Based on these statistics and visualizations depicted above, associations between cardiovascular disease prevalence and predictor variables can be observed. When observing the box plot visualization comparing Female and Male instances of CVD hospitalizations using Data_Value, for example, we see the median Data_Value rate for Males is slightly higher on average with a value of 21.00 when compared to a median Data_Value rate of 17.65 for Females. Consequently, we can ask and answer the following research question using statistical analysis:
 
 **Are Males more Susceptible (in comparison to Females) to Hospitalizations with Heart Failure as the Principal Diagnosis?**
 
@@ -235,30 +253,33 @@ gender_boot_diff_mean <- cms_data %>%
   order=c("Male", "Female"))
 head(gender_boot_diff_mean)
 
-## Visualize the bootstrap distribution of the different in mean value between Males and Females
-gender_boot_diff_mean %>% 
-  visualize()+
-  labs(title="1000 bootstraps of the difference of proportion",
-       y="count",
-       x="Bootstrapped difference of proportions in mean value between Males and Females")
-
 ## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
-gender_boot_diff_mean %>% 
+gender_ci <- gender_boot_diff_mean %>% 
   summarize(mean=mean(stat),
             lower=quantile(stat, 0.025),
             upper=quantile(stat, 0.975))
+gender_ci
+
+## Visualize the bootstrap distribution of the difference in mean value between Males and Females
+gender_boot_diff_mean %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Males and Females") +
+  shade_p_value(obs_stat=gender_ci$upper, direction="both")
 ```
 
-Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped proportion of the difference in mean value between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598.
+Based on the initial histogram depicted above, the distribution and frequency of the bootstrapped difference in mean values between Males and Females can be visualized. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between Males and Females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598).
 
 #### How does geographic location influence Cardiovascular Disease and Hospitalizations?
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
-Data set
+Here is an starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
 ```{r summarise-data-age-percentage, echo=FALSE}
-## A general analysis and data clean up for comparing relatinship between age and
+## A general analysis and data clean up for comparing relationship between age and
 ## Cardiovascular Diseases and Hospitalizations.
 age_only <- cms_data %>% 
   filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
@@ -274,26 +295,38 @@ age_only <- cms_data %>%
 glimpse(age_only)
 ```
 
-Graph
+```{r topic-vs-age-box-plot, echo=FALSE}
+## New facet label names for diseases
+diseases_label <- c("Heart Attack", "Coronary Heart Disease", "Heart Disease", 
+    "Heart Failure", "Major Cardiovascular Disease",
+    "Stroke")
+names(diseases_label) <- c("Acute Myocardial Infarction (Heart Attack)", "Coronary Heart Disease",
+                     "Diseases of the Heart (Heart Disease)", "Heart Failure",
+                     "Major Cardiovascular Disease", "Stroke")
 
-```{r topic-vs-age-graph, echo=FALSE}
-ggplot(data = age_only, 
-       mapping = aes(x = Age, y = mean_percentage, fill = Age)) +
-  geom_bar(position = "dodge", stat = "identity") +
-  facet_wrap(~ Topic) +
-  labs(title = "Mean percentage between different ages",
-       subtitle = "among different type of heart diseases")
+ggplot(data = cms_data %>% 
+         filter(!is.na(Data_Value), Break_Out_Category == "Age") %>% 
+         rename(Age = "Break_Out"),
+       mapping = aes(x = Age, y = Data_Value, fill = Age)) +
+  geom_boxplot() +
+  facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
+  labs(title = "")
 ```
 
-From the graphs, we can see that the difference between each age group are really small for different type of cardiovascular disease, so it will be more appropriate if using permutation, because this method will be focused on discovering if there is an relationship between age and cardiovascular diseases.
+From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. 
 
 ```{r linear-modeling, echo=FALSE}
+## Set up a linear model to compare relationship
 model1 <- lm(Data_Value ~ Topic, data = cms_data)
 tidy(model1)
 
+## Calculate the r.squared
 rsquared <- glance(model1) %>% 
-  select(r.squared, adj.r.squared)
+  select(adj.r.squared) %>% 
+  pull()
 rsquared
 ```
+
+
 
 ## Conclusion
