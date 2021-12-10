@@ -285,18 +285,31 @@ Consequently, we can specify our general research question by asking and answeri
 **Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, Males will be adversely impacted by high rates of heart failure related hospitalizations in proportion to Females. The proportion of Males for high rates of heart failure related hospitalizations are greater than Females (proportion Male\>proportion Female).
 
 ```{r gender-statistical-analysis-setup, echo=FALSE}
-## Filter data frame by Gender and high rates of heart failure hospitalizations
+## Create new dataframe by Gender and high rates of heart failure hospitalizations
+## Mutate new boolean column describing whether High_Rate == "yes" or "no".
 gender_high_rates <- cms_data %>% 
   filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
-  filter(Data_Value > 23)
+  mutate(High_Rate = 
+           case_when(Data_Value < 23 ~ "no",
+                     Data_Value >= 23 ~"yes"
+  ))
 
 ## Count observations in filtered data frame
-gender_high_rates %>% 
+gender_high_rates %>%
+  filter(High_Rate == "yes") %>% 
   count()
 
-## Assign null difference in proportion
-obs_diff <- 0
+## Get proportion of yes vs no high rates of heart failure hospitalizations based on Gender
+prop_gender_high_rates <- gender_high_rates %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    prop_yes = mean(High_Rate == "yes"),
+    prop_no = mean(High_Rate == "no")
+  )
+prop_gender_high_rates
+
+## Get the observed difference of proportion of yes to high rates of heart failure hospitalizations based on Gender
 ```
 
 In this analysis, statistical methods and \_\_
@@ -311,7 +324,7 @@ gender_high_boot_diff_prop <- cms_data %>%
   filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
   filter(Data_Value > 23) %>% 
-  specify(response = Break_Out) %>%
+  specify(response = Break_Out, success = "Male") %>%
   hypothesize(null = "point", p = 0) %>% 
   generate(reps = 1000, type = "draw") %>%
   calculate(stat = "prop")
