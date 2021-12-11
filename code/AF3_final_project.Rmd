@@ -24,12 +24,11 @@ cms_data$Data_Value <- as.numeric(cms_data$Data_Value)
 
 ## Introduction
 
+Cardiovascular disease and Hospitalization is a crucial topic because it is so closely related with our lives without our notice, from other statistical data provided by the [*Centers for Disease Control and Prevention (CDC)*](https://www.cdc.gov/heartdisease/facts.htm), it shows that **one person dies every 36 seconds** in the United States from cardiovascular disease. About 659,000 people in United States die from heart diseases, which is about 1 in every four deaths. Treatments for cardiovascular diseases of people is also incredibly expensive and it could take a long time for it to be cured or, in many cases, it may never be cured. It costs the United States about \$363 billion each year from 2016 to 2017. This includes the cost of health care services, medicines, and lost productivity due to death. In addition, since cardiovascular diseases is so dangerously common, it interests us to discover more about cardiovascular disease's relationship between variables, such as location, age, race, and gender.
+
 Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease?
 
-[Motivate why topic is interesting and important]
-Cardiovascular disease and Hospitalization is a crucial topic because it is so closely related with our lives without our notice, from other statistical data provided by the *[Centers for Disease Control and Prevention (CDC)](https://www.cdc.gov/heartdisease/facts.htm)*, it shows that **one person dies every 36 seconds** in the United States from cardiovascular disease. About 659,000 people in United States die from heart diseases, which is about 1 in every four deaths. Treatments for cardiovascular diseases of people is also incredibly expensive and it could take a long time for it to be cured or, in many cases, it may never be cured. It costs the United States about $363 billion each year from 2016 to 2017. This includes the cost of health care services, medicines, and lost productivity due to death. In addition, since cardiovascular diseases is so dangerously common, it interests us to discover more about cardiovascular disease's relationship between variables, such as location, age, race, and gender. 
-
-```{r introduction-stats}
+```{r introduction-stats, echo=FALSE}
 ## Summarize the mean and median value by Predictor Variables and Percent
 variable_stats_percent <- cms_data %>% 
   filter(Data_Value_Unit=="Percent (%)", Indicator=="Prevalence of major cardiovascular disease hospitalizations among all hospitalizations, US Medicare FFS beneficiaries (65+)") %>% 
@@ -42,7 +41,7 @@ variable_stats_percent <- cms_data %>%
 variable_stats_percent
 ```
 
-```{r introduction-visualization}
+```{r introduction-visualization, echo=FALSE}
 ## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Rate
 faceted_plot_rate <- ggplot(data=cms_data %>% 
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<40, Data_Value_Unit=="Percent (%)"),
@@ -163,7 +162,7 @@ ggplot(data=cms_data %>%
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals. Looking at the data collected from 2004 - 2013, on average, about `r hispanic_mean` (per 1000 people) Hispanic individuals are hospitalized for cardiovascular diseases while `r black_mean` Non-Hispanic African Americans are hospitalized for the same reasons. These rates are considerably higher in comparison to the rate of White Americans per 1000 people where only about `r white_mean` individuals are hospitalized. This means that per 1000 people, about `r black_diff` more African Americans and `r hisp_diff` more Hispanics normally find themselves affected by cardiovascular disease. 
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals. Looking at the data collected from 2004 - 2013, on average, about `r hispanic_mean` (per 1000 people) Hispanic individuals are hospitalized for cardiovascular diseases while `r black_mean` Non-Hispanic African Americans are hospitalized for the same reasons. These rates are considerably higher in comparison to the rate of White Americans per 1000 people where only about `r white_mean` individuals are hospitalized. This means that per 1000 people, about `r black_diff` more African Americans and `r hisp_diff` more Hispanics normally find themselves affected by cardiovascular disease.
 
 #### **How much more affected by Cardiovascular Disease Hospitalizations are Hispanics and Non-Hispanic Black individuals compared to Non-Hispanic Whites?**
 
@@ -213,7 +212,6 @@ hisp_data <- avg_mean %>%
 #  specify() %>%
 #  hypothesize(null = "independence") %>%
 ```
-
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
@@ -442,7 +440,7 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-Linear model for age and cardiovascular disease: _Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488_
+Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
 
 The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
 
@@ -457,5 +455,5 @@ rsquared
 The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
 
 ## Conclusion
-Age:
-Since the r squared of the linear model shows that our linear model is significant, and from the linear model, we can tell that different types of diseases have their impact on the percentage of the people, however, comparing with all the diseases, the impact of the age on the percentage of people having the diseases will be relatively insignificant than the others, in this data set, it will be between age group of 65+ and 75+. However, even though it shows that there isn't a strong relationship between age and cardiovascular diseases, there are not other samples from other age groups other than age of 65+ and 75+ to tell us the difference. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and cardiovascular diseases and hospitalizations.
+
+Age: Since the r squared of the linear model shows that our linear model is significant, and from the linear model, we can tell that different types of diseases have their impact on the percentage of the people, however, comparing with all the diseases, the impact of the age on the percentage of people having the diseases will be relatively insignificant than the others, in this data set, it will be between age group of 65+ and 75+. However, even though it shows that there isn't a strong relationship between age and cardiovascular diseases, there are not other samples from other age groups other than age of 65+ and 75+ to tell us the difference. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and cardiovascular diseases and hospitalizations.
