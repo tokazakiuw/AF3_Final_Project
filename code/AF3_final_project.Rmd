@@ -164,7 +164,13 @@ ggplot(data=cms_data %>%
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States.
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals.
+
+#### **How much more affected by Cardiovascular Disease Hospitalizations are Hispanics and Non-Hispanic Black individuals compared to Non-Hispanic Whites?**
+
+**Null Hypothesis: Being a Hispanic or Non-Hispanic Black individual does not increase the risk of being hospitalized for Cardiovascular Disease in the US.**
+
+**Alternative Hypothesis: Being a Hispanic or Non-Hispanic Black individual does increase the risk of being hospitalized for Cardiovascular Disease in the US.**
 
 ```{r race-analysis, echo = FALSE}
 avg_mean <- cms_data %>%
@@ -172,9 +178,15 @@ avg_mean <- cms_data %>%
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
   group_by(LocationAbbr, Break_Out) %>%
   summarize(mean = mean(Data_Value),
-            median = median(Data_Value))
+            median = median(Data_Value)) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ "yes", TRUE ~ "no"
+  ))
   
 avg_mean
+
+# Find confidence interval/difference in means
+# Do hypothesis testing 
 
 west_coast <- avg_mean %>%
   filter(LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA"))
@@ -183,6 +195,11 @@ west_coast
 south_states <- avg_mean %>%
   filter(LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK"))
 south_states
+
+set.seed(525)
+null_dist <- avg_mean %>%
+  specify(response = in_south, explanatory = mean, success = "yes") %>%
+  hypothesize(null = "independence") %>%
 ```
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
