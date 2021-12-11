@@ -134,37 +134,36 @@ race_data <- cms_data %>%
     #topic = count(Topic)
   )
 
-location_data <- cms_data %>%
-  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
-  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
-  #group_by(Break_Out) %>%
-  count(LocationAbbr, Break_Out) 
-  
-
-location_data
 race_data
 
+hispanic_mean <- race_data %>%
+  filter(Break_Out == "Hispanic") %>%
+  pull(mean_value)
 
-ggplot(data=cms_data %>% 
-                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Race", Data_Value_Unit=="Rate per 1,000"),
-                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
-                    geom_boxplot()
+black_mean <- race_data %>%
+  filter(Break_Out == "Non-Hispanic Black") %>%
+  pull(mean_value)
+
+white_mean <- race_data %>%
+  filter(Break_Out == "Non-Hispanic White") %>%
+  pull(mean_value)
+
+black_diff <- black_mean - white_mean
+hisp_diff <- hispanic_mean - white_mean
 ```
 
 ```{r race-hist, echo=FALSE}
 ggplot(race_data, aes(x = Break_Out, y = mean_value)) + 
   geom_bar(stat = "identity")
 
-
-
 ggplot(data=cms_data %>% 
-                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Race"), mapping=aes(x=Data_Value)) +
-                    geom_histogram(binwidth = 6) +
-                      facet_wrap(~Break_Out) 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Race", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot()
 
 ```
 
-From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals.
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals. Looking at the data collected from 2004 - 2013, on average, about `r hispanic_mean` (per 1000 people) Hispanic individuals are hospitalized for cardiovascular diseases while `r black_mean` Non-Hispanic African Americans are hospitalized for the same reasons. These rates are considerably higher in comparison to the rate of White Americans per 1000 people where only about `r white_mean` individuals are hospitalized. This means that per 1000 people, about `r black_diff` more African Americans and `r hisp_diff` more Hispanics normally find themselves affected by cardiovascular disease. 
 
 #### **How much more affected by Cardiovascular Disease Hospitalizations are Hispanics and Non-Hispanic Black individuals compared to Non-Hispanic Whites?**
 
@@ -181,6 +180,9 @@ avg_mean <- cms_data %>%
             median = median(Data_Value)) %>%
   mutate(in_south = case_when(
     LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ "yes", TRUE ~ "no"
+  ),
+  in_west = case_when(
+    LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ "yes", TRUE ~ "no"
   ))
   
 avg_mean
@@ -196,11 +198,22 @@ south_states <- avg_mean %>%
   filter(LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK"))
 south_states
 
-set.seed(525)
-null_dist <- avg_mean %>%
-  specify(response = in_south, explanatory = mean, success = "yes") %>%
-  hypothesize(null = "independence") %>%
+black_data <- avg_mean %>%
+  filter(Break_Out == "Non-Hispanic Black") %>%
+  mutate(higher_rate = case_when(mean > (white_mean + black_diff) ~ 1, TRUE ~ 0)) %>%
+  mutate(lower_rate = case_when(mean < (white_mean + black_diff) ~ 1, TRUE ~ 0))
+
+hisp_data <- avg_mean %>%
+  filter(Break_Out == "Hispanic") %>%
+  mutate(higher_rate = case_when(mean > (white_mean + hisp_diff) ~ 1, TRUE ~ 0)) %>%
+  mutate(lower_rate = case_when(mean < (white_mean + hisp_diff) ~ 1, TRUE ~ 0))
+
+#set.seed(525)
+#null_dist <- avg_mean %>%
+#  specify() %>%
+#  hypothesize(null = "independence") %>%
 ```
+
 
 #### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
 
