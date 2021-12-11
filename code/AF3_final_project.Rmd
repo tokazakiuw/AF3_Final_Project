@@ -213,9 +213,7 @@ hisp_data <- avg_mean %>%
 #  hypothesize(null = "independence") %>%
 ```
 
-#### **Are there differences in Cardiovascular Disease Hospitalizations and Gender (Male vs. Female)?**
-
-An initial summary and visualizations depicting the distribution of cardiovascular disease hospitalizations is shown below.
+#### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
 ```{r stat-analysis-gender-1, echo=FALSE}
 ## Summarize the mean, median, IQR, and sd by Gender and Rate
@@ -309,7 +307,7 @@ Consequently, we can specify our general research question by asking and answeri
 
 **Are Males more Susceptible (in comparison to Females) to High Rates of Hospitalizations with Heart Failure as the Principal Diagnosis?**
 
-**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, the variables `Break_Out` (Gender) and High_Rate are independent: the difference in proportion between Genders for high rates of heart failure related hospitalizations are equal to 0 (high_rate_proportion Male == high_rate_proportion Female) .
+**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, the variables `Break_Out` (Gender) and `High_Rate` are independent: the difference in proportion between Genders for high rates of heart failure related hospitalizations are equal to 0 (high_rate_proportion Male == high_rate_proportion Female) .
 
 **Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, Males will be adversely impacted by high rates of heart failure related hospitalizations in proportion to Females. The difference in proportion between Males and Females for high rates of heart failure related hospitalizations are greater than zero (proportion Male\>proportion Female).
 
@@ -347,7 +345,7 @@ obs_diff <- prop_gender_high_rates %>%
 obs_diff
 ```
 
-In this analysis, statistical methods and \_\_
+In this analysis, [explain the re coding of data and new High_Rate variable, foundation to statistical analysis, and justify using statistical methods (what is represents, why using it, and compare to alternatives),
 
 ```{r gender-statistical-setup, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
