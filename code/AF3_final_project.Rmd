@@ -228,7 +228,16 @@ black_boot_diff_mean <- cms_data %>%
   order=c("Non-Hispanic Black", "Non-Hispanic White"))
   
 head(black_boot_diff_mean)
-get_confidence_interval(black_boot_diff_mean)
+black_ci <- get_confidence_interval(black_boot_diff_mean)
+black_ci
+
+black_boot_diff_mean %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Whites and African Americans") +
+  shade_p_value(obs_stat=black_ci$upper_ci, direction="both")
 ```
 ```{r diff_in_means_hisp, echo = FALSE}
 set.seed(5734)
@@ -243,8 +252,19 @@ hisp_boot_diff_mean <- cms_data %>%
   order=c("Hispanic", "Non-Hispanic White"))
   
 head(hisp_boot_diff_mean)
-get_confidence_interval(hisp_boot_diff_mean)
+hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
+
+hisp_boot_diff_mean %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Whites and Hispanics") +
+  shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
+
 ```
+
+
 
 ```{r race-modeling, echo=FALSE}
 
@@ -289,8 +309,9 @@ hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
 tidy(hisp_model_south)
 ```
 
-From these models, we see that  around 31 ~ 33 Non-Hispanic Black Individuals and around 24 ~ 27 Hispanics are expected to be hospitalized for cardiovascular disease.
+From these models, we see that  around 31 ~ 33 Non-Hispanic Black Individuals and around 24 ~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 ~ 8 people for Hispanics and African Americans and goes up by around 3 ~ 4 in the more conservative south.
 
+### Can we predict the rate of Hospitalizations for people of different races based on their location? 
 ```{r RMSE, echo=FALSE}
 
 # split the data into testing and training sets
@@ -299,18 +320,78 @@ black_split <- initial_split(black_only, prop=0.8)
 black_train<-training(black_split)
 black_test <- testing(black_split)
 
+# fit a model for Non-Hispanic African Americans in west
 black_fit <- lm(Data_Value ~ Break_Out + in_west, data = black_train)
 tidy(black_fit)
 
 black_pred <- predict(black_fit, newdata=black_test) %>%
-  bind_cols(black_test %>% select(Data_Value)) %>%
+  bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
 black_pred
 
-rmse(black_pred, truth = Data_Value, estimate = pred)
+black_pred <- black_pred %>%
+  filter(Break_Out == "Non-Hispanic Black")
+
+west <- rmse(black_pred, truth = Data_Value, estimate = pred)
+west
+# fit model for those in the south
+black_fit_south <- lm(Data_Value ~ Break_Out + in_south, data = black_train)
+tidy(black_fit)
+
+black_pred_south <- predict(black_fit_south, newdata=black_test) %>%
+  bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+black_pred_south
+
+black_pred_south <- black_pred %>%
+  filter(Break_Out == "Non-Hispanic Black")
+
+south <- rmse(black_pred_south, truth = Data_Value, estimate = pred)
+south
+
 ```
 
+```{r hisp-RMSE, echo = FALSE}
+# split the data into testing and training sets
+set.seed(232)
+hisp_split <- initial_split(hisp_only, prop=0.8)
+hisp_train<-training(hisp_split)
+hisp_test <- testing(hisp_split)
+
+# fit a model for Non-Hispanic African Americans in west
+hisp_fit <- lm(Data_Value ~ Break_Out + in_west, data = hisp_train)
+tidy(hisp_fit)
+
+hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
+  bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+hisp_pred
+
+hisp_pred <- hisp_pred %>%
+  filter(Break_Out == "Hispanic")
+
+west_hisp <- rmse(hisp_pred, truth = Data_Value, estimate = pred)
+west_hisp
+# fit model for those in the south
+hisp_fit_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_train)
+tidy(hisp_fit)
+
+hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
+  bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+hisp_pred_south
+
+hisp_pred_south <- hisp_pred %>%
+  filter(Break_Out == "Hispanic")
+
+south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
+south_hisp
+```
+The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set. 
 
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
