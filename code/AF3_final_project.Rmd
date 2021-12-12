@@ -563,7 +563,7 @@ gender_high_pvalue <- gender_high_boot_diff_prop %>%
 
 At a 1% level of significance the p-value must be \>= 0.01 to draw a conclusion, which is rejecting the null hypothesis. Since the p-value is extremely small (p-value = `r gender_high_pvalue`) and is less than 0.01, we are provided with strong evidence to reject the null hypothesis that Gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Furthermore, we can conclude that our data provides strong evidence that in the population of patients our data is sampled from, Males are adversely impacted by high rates of heart failure related hospitalizations in proportion to Females.
 
-#### Is there a relationship between Cardiovascular Diseases and Geographical Region?
+#### Is there a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.?
 
 ```{r data-preparation, echo=FALSE}
 cms_filter <- cms_data %>% 
@@ -598,6 +598,10 @@ ggplot(data = cms_summary,
 ```
 
 Of the six conditions shown on this preliminary plot, five of them do not appear to have significant variance in average percentages depending on the region of the U.S. the data is sourced from. The only condition that appears to be affected by the region is Heart Failure. As a result of this observation, the rest of this subsection will focus primarily on this apparent relationship between Heart Failure and U.S. geographical region.
+
+**Null Hypothesis: There is no relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.**
+
+**Alternative Hypothesis: There is a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.**
 
 ```{r topic-vs-region-box-plot, echo=FALSE}
 cms_hf <- cms_filter %>% filter(Topic == "Heart Failure", Data_Value < 100, Region == "Rocky Mountain" | Region == "Southeast")
