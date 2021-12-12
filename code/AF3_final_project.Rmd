@@ -186,18 +186,18 @@ avg_mean <- cms_data %>%
     LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ "yes", TRUE ~ "no"
   ))
   
-avg_mean
+head(avg_mean)
 
 # Find confidence interval/difference in means
 # Do hypothesis testing 
 
 west_coast <- avg_mean %>%
   filter(LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA"))
-west_coast
+head(west_coast)
 
 south_states <- avg_mean %>%
   filter(LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK"))
-south_states
+head(south_states)
 
 black_data <- avg_mean %>%
   filter(Break_Out == "Non-Hispanic Black") %>%
@@ -328,7 +328,7 @@ black_pred <- predict(black_fit, newdata=black_test) %>%
   bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-black_pred
+head(black_pred)
 
 black_pred <- black_pred %>%
   filter(Break_Out == "Non-Hispanic Black")
@@ -343,7 +343,7 @@ black_pred_south <- predict(black_fit_south, newdata=black_test) %>%
   bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-black_pred_south
+head(black_pred_south)
 
 black_pred_south <- black_pred %>%
   filter(Break_Out == "Non-Hispanic Black")
@@ -368,7 +368,7 @@ hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-hisp_pred
+head(hisp_pred)
 
 hisp_pred <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
@@ -383,7 +383,7 @@ hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-hisp_pred_south
+head(hisp_pred_south)
 
 hisp_pred_south <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
@@ -622,13 +622,13 @@ Based on the medians, ranges, and interquartile ranges of the data as shown by t
 
 Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
-```{r data-preparation, echo=FALSE}
+```{r data-preparation1, echo=FALSE}
 age_comparison <- cms_data %>% 
   filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>%
   rename(Age = "Break_Out")
 ```
 
-```{r general-summary, echo=FALSE, message=FALSE}
+```{r general-summary1, echo=FALSE, message=FALSE}
 ## A general analysis and data clean up for comparing relationship between age and
 ## Cardiovascular Diseases and Hospitalizations.
 age_only <- age_comparison %>% 
