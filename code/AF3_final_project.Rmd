@@ -213,6 +213,39 @@ hisp_data <- avg_mean %>%
 #  hypothesize(null = "independence") %>%
 ```
 
+```{r diff_in_means_black, echo = FALSE}
+set.seed(5734)
+black_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Non-Hispanic Black", "Non-Hispanic White")) %>%
+  group_by(Break_Out) %>%
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Non-Hispanic Black", "Non-Hispanic White"))
+  
+head(black_boot_diff_mean)
+get_confidence_interval(black_boot_diff_mean)
+```
+```{r diff_in_means_hisp, echo = FALSE}
+set.seed(5734)
+hisp_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Hispanic", "Non-Hispanic White")) %>%
+  group_by(Break_Out) %>%
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Hispanic", "Non-Hispanic White"))
+  
+head(hisp_boot_diff_mean)
+get_confidence_interval(hisp_boot_diff_mean)
+```
+
+
+
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
 ```{r stat-analysis-gender-1, echo=FALSE}
