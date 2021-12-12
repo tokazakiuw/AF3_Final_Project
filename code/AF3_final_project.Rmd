@@ -244,6 +244,12 @@ head(hisp_boot_diff_mean)
 get_confidence_interval(hisp_boot_diff_mean)
 ```
 
+```{r race-modeling, echo=FALSE}
+#black_model <- lm(Data_Value ~ Topic + Age, data = age_comparison)
+#tidy(model1)
+
+```
+
 
 
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
