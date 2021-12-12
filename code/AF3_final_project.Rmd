@@ -76,41 +76,24 @@ glimpse(cms_data)
 
 A description of the variables is below:
 
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | Variable Name         | Description                                                                                                   | Data Type  |
-+=======================+===============================================================================================================+============+
+|-----------------------|---------------------------------------------------------------------------------------------------------------|------------|
 | `Year`                | Year                                                                                                          | Number     |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Topic`               | Topic description                                                                                             | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Indicator`           | Indicator description                                                                                         | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out`           | Break out group description                                                                                   | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationId`          | Location lookup value                                                                                         | Plain Text |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
-+-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 
 ## Analysis
 
@@ -239,6 +222,7 @@ black_boot_diff_mean %>%
        x="Bootstrapped difference in mean value between Whites and African Americans") +
   shade_p_value(obs_stat=black_ci$upper_ci, direction="both")
 ```
+
 ```{r diff_in_means_hisp, echo = FALSE}
 set.seed(5734)
 hisp_boot_diff_mean <- cms_data %>%
@@ -263,8 +247,6 @@ hisp_boot_diff_mean %>%
   shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
 
 ```
-
-
 
 ```{r race-modeling, echo=FALSE}
 
@@ -309,9 +291,10 @@ hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
 tidy(hisp_model_south)
 ```
 
-From these models, we see that  around 31 ~ 33 Non-Hispanic Black Individuals and around 24 ~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 ~ 8 people for Hispanics and African Americans and goes up by around 3 ~ 4 in the more conservative south.
+From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
 
-### Can we predict the rate of Hospitalizations for people of different races based on their location? 
+### Can we predict the rate of Hospitalizations for people of different races based on their location?
+
 ```{r RMSE, echo=FALSE}
 
 # split the data into testing and training sets
@@ -391,7 +374,8 @@ hisp_pred_south <- hisp_pred %>%
 south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
 south_hisp
 ```
-The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set. 
+
+The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
 
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
