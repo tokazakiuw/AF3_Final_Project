@@ -66,9 +66,7 @@ Dimensions of the `cms_data` data frame (after cleaning).
 
 -   Columns/Variables: 16
 
-Print the output of `glimpse` of data frame: `cms_data`
-
-```{r glimpse-data}
+```{r glimpse-data, include=FALSE}
 glimpse(cms_data)
 ```
 
