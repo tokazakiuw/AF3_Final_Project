@@ -28,7 +28,7 @@ cms_data$Data_Value <- as.numeric(cms_data$Data_Value)
 
 Cardiovascular disease susceptibility and related hospitalizations is a crucial topic of research because it is intertwined with our lifestyle and consequent life expectancy. From statistical data provided by [*Centers for Disease Control and Prevention (CDC)*](https://www.cdc.gov/heartdisease/facts.htm), it shows that **one person dies every 36 seconds** in the United States from cardiovascular disease; furthermore, about 659,000 people in United States die from heart diseases, which is about 1 in every four deaths. Considering the emerging epidemic that is cardiovascular disease in the developing world, having adequate treatments are essential to reducing symptoms and mortality. However, treatments for cardiovascular disease are expensive, lengthy, are often not adequate to helping patients in need. In order to fight this emerging epidemic, it is essential to educate individuals on the factors that increases their susceptibility for cardiovascular disease. Likewise, since cardiovascular disease is so dangerously common, it interests us to discover more about cardiovascular disease's relationship between predictor variables, such as location, age, race, and gender.
 
-Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease?
+Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general research question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease and hospitalization rates? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease and hospitalization rates?
 
 ```{r introduction-stats, echo=FALSE}
 ## Summarize the mean and median value by Predictor Variables and Percent
@@ -55,8 +55,6 @@ faceted_plot_rate <- ggplot(data=cms_data %>%
                          x="Data_Value")
 faceted_plot_rate
 ```
-
-[Research questions you will be investigating]
 
 #### Code Book
 
@@ -266,7 +264,9 @@ hisp_boot_diff_mean %>%
   shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
 
 ```
-We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher. 
+
+We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher.
+
 ```{r race-modeling, echo=FALSE}
 
 # create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
