@@ -582,8 +582,8 @@ Of the six conditions shown on this preliminary plot, five of them do not appear
 **Alternative Hypothesis: There is a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.**
 
 ```{r topic-vs-region-box-plot, echo=FALSE}
-cms_hf <- cms_filter %>% filter(Topic == "Heart Failure", Data_Value < 100, Region == "Rocky Mountain" | Region == "Southeast")
-ggplot(data = cms_hf,
+cms_hf <- cms_filter %>% filter(Topic == "Heart Failure")
+ggplot(data = cms_hf %>% filter(Data_Value < 150),
        mapping = aes(x = Data_Value, fill = Region)) +
   geom_boxplot() +
   labs(title = "Percentages of Heart Failure by Region of U.S.",
@@ -593,7 +593,14 @@ ggplot(data = cms_hf,
 
 Based on the medians, ranges, and interquartile ranges of the data as shown by the box plots, it would be fair to say that people living in the Southeast region of the United States appear to, on average, have a notably higher percentage of heart failure than those who live in the Rocky Mountain region of the United States. More specifically, the median of 18.7, the IQR of 22.7, and the range of 212.9 for the Southeast Region are all significantly higher than the comparable values of the Rocky Mountain region, which are 10.1, 12.825, and 136, respectively.
 
-(I will add inference and conclusion soon!)
+```{r analysis-of-variance, echo=FALSE}
+one.way <- aov(Data_Value ~ Region, data = cms_hf)
+TukeyHSD(one.way)
+summary(one.way)
+```
+According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts:
+1. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant.
+2. The test gave an F-Value of 123.2, which is far greater than the ~1 necessary to accept the null hypothesis.
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
