@@ -151,12 +151,14 @@ hisp_diff <- hispanic_mean - white_mean
 
 ```{r race-hist, echo=FALSE}
 ggplot(race_data, aes(x = Break_Out, y = mean_value)) + 
-  geom_bar(stat = "identity")
+  geom_bar(stat = "identity") + 
+  labs(x = "Race", y = "Average Rate per 1000")
 
 ggplot(data=cms_data %>% 
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Race", Data_Value_Unit=="Rate per 1,000"),
                         mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
-                    geom_boxplot()
+                    geom_boxplot() + 
+                    labs(title = "Boxplot of Hospitalizations", x = "Race", y = "Average Rate per 1,000")
 
 ```
 
@@ -187,28 +189,6 @@ head(avg_mean)
 # Find confidence interval/difference in means
 # Do hypothesis testing 
 
-west_coast <- avg_mean %>%
-  filter(LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA"))
-head(west_coast)
-
-south_states <- avg_mean %>%
-  filter(LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK"))
-head(south_states)
-
-black_data <- avg_mean %>%
-  filter(Break_Out == "Non-Hispanic Black") %>%
-  mutate(higher_rate = case_when(mean > (white_mean + black_diff) ~ 1, TRUE ~ 0)) %>%
-  mutate(lower_rate = case_when(mean < (white_mean + black_diff) ~ 1, TRUE ~ 0))
-
-hisp_data <- avg_mean %>%
-  filter(Break_Out == "Hispanic") %>%
-  mutate(higher_rate = case_when(mean > (white_mean + hisp_diff) ~ 1, TRUE ~ 0)) %>%
-  mutate(lower_rate = case_when(mean < (white_mean + hisp_diff) ~ 1, TRUE ~ 0))
-
-#set.seed(525)
-#null_dist <- avg_mean %>%
-#  specify() %>%
-#  hypothesize(null = "independence") %>%
 ```
 
 ```{r diff_in_means_black, echo = FALSE}
@@ -254,7 +234,7 @@ hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
 hisp_ci
 
 hisp_boot_diff_mean %>% 
-  visualize()+
+  visualize() +
   labs(title="1000 bootstraps of the difference in means",
        subtitle="95% confidence interval",
        y="count",
@@ -268,6 +248,7 @@ We can see with 95% confidence, the difference in rates between whites and Non-H
 ```{r race-modeling, echo=FALSE}
 
 # create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
+# Add new columns listing what states are in west coast and south
 black_only <- cms_data %>%
   filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
@@ -280,7 +261,6 @@ black_only <- cms_data %>%
   )) 
   
   
-  
 black_model_west <- lm(Data_Value ~ Break_Out + in_west, data = black_only)
 tidy(black_model_west)
 
@@ -290,6 +270,9 @@ tidy(black_model_south)
 ```
 
 ```{r hisp-modeling, echo=FALSE}
+
+# Create new data frame for Hispanics and Non-Hispanic Whites
+# Add new columns listing what states are in west coast and south
 hisp_only <- cms_data %>%
   filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
@@ -301,9 +284,11 @@ hisp_only <- cms_data %>%
      LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
   ))
 
+# create regression model for Hispanics compared to Non-Hispanic Whites when in the west
 hisp_model_west <- lm(Data_Value ~ Break_Out + in_west, data = hisp_only)
 tidy(hisp_model_west)
 
+# create regression model for Hispanics compared to Non-Hispanic Whites when in the south
 hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
 tidy(hisp_model_south)
 ```
@@ -312,7 +297,7 @@ From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals an
 
 ### Can we predict the rate of Hospitalizations for people of different races based on their location?
 
-```{r RMSE, echo=FALSE}
+```{r RMSE, echo=FALSE, include=FALSE}
 
 # split the data into testing and training sets
 set.seed(232)
@@ -327,8 +312,6 @@ tidy(black_fit)
 black_pred <- predict(black_fit, newdata=black_test) %>%
   bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
-
-head(black_pred)
 
 black_pred <- black_pred %>%
   filter(Break_Out == "Non-Hispanic Black")
@@ -353,7 +336,12 @@ south
 
 ```
 
-```{r hisp-RMSE, echo = FALSE}
+```{r blac-RMSE-result, echo=FALSE}
+west
+south
+```
+
+```{r hisp-RMSE, echo = FALSE, include=FALSE}
 # split the data into testing and training sets
 set.seed(232)
 hisp_split <- initial_split(hisp_only, prop=0.8)
@@ -368,7 +356,7 @@ hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-head(hisp_pred)
+#head(hisp_pred)
 
 hisp_pred <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
@@ -383,12 +371,17 @@ hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-head(hisp_pred_south)
+#head(hisp_pred_south)
 
 hisp_pred_south <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
 
 south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
+south_hisp
+```
+
+```{r hisp-RMSE-result, echo=FALSE}
+west_hisp
 south_hisp
 ```
 
