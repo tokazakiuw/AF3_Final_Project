@@ -526,9 +526,7 @@ obs_diff <- prop_gender_high_rates %>%
 obs_diff
 ```
 
-[explain the re coding of data and new High_Rate variable, foundation to statistical analysis, and justify using statistical methods (what is represents, why using it, and compare to alternatives)]
-
-In this analysis, a bootstrap difference in proportions can be used to gain insights on the null/alternative hypothesis. Setting the infrastructure for analysis, a new column (variable) called `High_Rate` can be created which categorizes observations by a boolean expression which denotes whether the rate of heart failure observed was high or not ("yes"/"no"). `High_Rate` specifically describes whether an observation had a heart failure rate greater than or equal to 50 for gender observations (if `Data_Value` \>= 50, `High_Rate` == "yes").
+In this analysis, a bootstrap difference in proportions can be used to gain insights on the null/alternative hypothesis. This method of statistical analysis is appropriate for this research question because it seeks to compare the relationship between two variables (high heart failure rates and gender) and justification for rejecting/failing to reject our null hypothesis. Setting the infrastructure for analysis, a new column (variable) called `High_Rate` can be created which categorizes observations by a boolean expression which denotes whether the rate of heart failure observed was high or not ("yes"/"no"). `High_Rate` specifically describes whether an observation had a heart failure rate greater than or equal to 50 for gender observations (if `Data_Value` \>= 50, `High_Rate` == "yes"). Subsequently, this new variable can be compared with gender to highlight whether the differences in proportion were statistically significant enough to suggest that `High_Rate` and gender were related. Considering the null hypothesis, we assume these variables to be unrelated and expect the difference in proportions to equal 0 (equal proportion of High_Rate between gender).
 
 ```{r gender-statistical-setup, echo=FALSE}
 ## Visualize the bootstrap distribution of difference in mean value between Males and Females
