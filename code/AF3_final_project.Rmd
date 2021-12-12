@@ -423,7 +423,8 @@ all_gender_stats_rate <- cms_data %>%
 all_gender_stats_rate
 ```
 
-```{r visual-analysis-gender-1, echo=FALSE}
+```{r visual-analysis-gender-1, echo=FALSE, include=FALSE}
+## Not included for space concerns.
 faceted_gender_plot_rate <- ggplot(data=cms_data %>% 
                        filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Gender"),
                         mapping=aes(x=Data_Value)) +
