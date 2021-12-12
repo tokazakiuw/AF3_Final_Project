@@ -238,6 +238,7 @@ black_boot_diff_mean %>%
        y="count",
        x="Bootstrapped difference in mean value between Whites and African Americans") +
   shade_p_value(obs_stat=black_ci$upper_ci, direction="both")
+
 ```
 
 ```{r diff_in_means_hisp, echo = FALSE}
@@ -254,6 +255,7 @@ hisp_boot_diff_mean <- cms_data %>%
   
 head(hisp_boot_diff_mean)
 hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
+hisp_ci
 
 hisp_boot_diff_mean %>% 
   visualize()+
@@ -264,7 +266,7 @@ hisp_boot_diff_mean %>%
   shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
 
 ```
-
+We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher. 
 ```{r race-modeling, echo=FALSE}
 
 # create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
