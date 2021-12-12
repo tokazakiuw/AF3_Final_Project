@@ -6,10 +6,12 @@ output: openintro::lab_report
 ---
 
 ```{r load-packages, message=FALSE, echo=FALSE}
+#install.packages("tidymodels")
 library(tidyverse)
 library(openintro)
 library(infer)
 library(broom)
+library(tidymodels)
 ```
 
 ```{r load-data, message=FALSE, echo=FALSE}
@@ -245,11 +247,69 @@ get_confidence_interval(hisp_boot_diff_mean)
 ```
 
 ```{r race-modeling, echo=FALSE}
-#black_model <- lm(Data_Value ~ Topic + Age, data = age_comparison)
-#tidy(model1)
+
+# create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
+black_only <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Non-Hispanic Black", "Non-Hispanic White")) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ 1, TRUE ~ 0
+  ),
+  in_west = case_when(
+     LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
+  )) 
+  
+  
+  
+black_model_west <- lm(Data_Value ~ Break_Out + in_west, data = black_only)
+tidy(black_model_west)
+
+black_model_south <- lm(Data_Value ~ Break_Out + in_south, data = black_only)
+tidy(black_model_south)
 
 ```
 
+```{r hisp-modeling, echo=FALSE}
+hisp_only <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Hispanic", "Non-Hispanic White")) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ 1, TRUE ~ 0
+  ),
+  in_west = case_when(
+     LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
+  ))
+
+hisp_model_west <- lm(Data_Value ~ Break_Out + in_west, data = hisp_only)
+tidy(hisp_model_west)
+
+hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
+tidy(hisp_model_south)
+```
+
+From these models, we see that  around 31 ~ 33 Non-Hispanic Black Individuals and around 24 ~ 27 Hispanics are expected to be hospitalized for cardiovascular disease.
+
+```{r RMSE, echo=FALSE}
+
+# split the data into testing and training sets
+set.seed(232)
+black_split <- initial_split(black_only, prop=0.8)
+black_train<-training(black_split)
+black_test <- testing(black_split)
+
+black_fit <- lm(Data_Value ~ Break_Out + in_west, data = black_train)
+tidy(black_fit)
+
+black_pred <- predict(black_fit, newdata=black_test) %>%
+  bind_cols(black_test %>% select(Data_Value)) %>%
+  rename(pred = ...1)
+
+black_pred
+
+rmse(black_pred, truth = Data_Value, estimate = pred)
+```
 
 
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
@@ -430,7 +490,7 @@ Here is an starting data summary of the data set comparing the relationship betw
 
 ```{r data-preparation, echo=FALSE}
 age_comparison <- cms_data %>% 
-  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>% 
+  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>%
   rename(Age = "Break_Out")
 ```
 
