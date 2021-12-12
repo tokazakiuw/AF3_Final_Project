@@ -72,24 +72,41 @@ glimpse(cms_data)
 
 A description of the variables is below:
 
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | Variable Name         | Description                                                                                                   | Data Type  |
-|-----------------------|---------------------------------------------------------------------------------------------------------------|------------|
++=======================+===============================================================================================================+============+
 | `Year`                | Year                                                                                                          | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Topic`               | Topic description                                                                                             | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Indicator`           | Indicator description                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out`           | Break out group description                                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationId`          | Location lookup value                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 
 ## Analysis
 
@@ -646,6 +663,45 @@ From the graphs, we can see that there is a relationship between age and heart d
 ## Set up a linear model to compare relationship
 model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
+```
+
+```{r spliting-data}
+## Set seed to 8239
+set.seed(8239)
+
+## Split age_comparison using initial_split
+age_split <- initial_split(age_comparison, prop=0.7)
+
+## Randomly sample 70% of rows and assign to age_train
+age_train <- training(age_split)
+## Assign remaining to age_test
+age_test <- testing(age_split)
+
+## Fit linear effects model to training data
+model1_age <- lm(Data_Value ~ Topic + Age, data=age_train)
+glance(model1_age) %>% 
+  select(adj.r.squared)
+
+## Create augmented data frame for model1_age
+model1_age_aug <- augment(model1_age)
+
+## Residual plot for model1_age_aug
+ggplot(data=model1_age_aug,
+       mapping=aes(x=.fitted,
+                   y=.resid)) +
+  geom_point() +
+  geom_hline(yintercept=0,color="red")
+
+## Evaluate model
+model1_age_pred <- predict(model1_age, age_test) %>% 
+  bind_cols(age_test %>% 
+  select(Data_Value)) %>% 
+  rename(pred=...1)
+
+rmse(model1_age_pred, truth=Data_Value, estimate=pred)
+
+age_test %>% 
+  summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
 ```
 
 Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
