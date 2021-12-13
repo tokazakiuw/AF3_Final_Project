@@ -194,7 +194,7 @@ black_boot_diff_mean <- cms_data %>%
   order=c("Non-Hispanic Black", "Non-Hispanic White"))
 ```
 
-```{r black-boot, echo=FALSE, message=FALSE}
+```{r black-boot, echo=FALSE, message=FALSE, warning=FALSE}
 black_ci <- get_confidence_interval(black_boot_diff_mean)
 black_ci
 
@@ -224,7 +224,7 @@ hisp_boot_diff_mean <- cms_data %>%
   order=c("Hispanic", "Non-Hispanic White"))
 ```
 
-```{r hisp-boot, echo=FALSE}  
+```{r hisp-boot, echo=FALSE, message=FALSE, warning=FALSE}  
 hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
 hisp_ci
 
@@ -243,7 +243,7 @@ hisp_boot_diff_mean %>%
 
 We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher.
 
-```{r race-modeling, echo=FALSE}
+```{r black-race-modeling, echo=FALSE}
 
 # create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
 # Add new columns listing what states are in west coast and south
@@ -258,10 +258,11 @@ black_only <- cms_data %>%
      LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
   )) 
   
-  
+# create regression model of hospitalizations in west coast
 black_model_west <- lm(Data_Value ~ Break_Out + in_west, data = black_only)
 tidy(black_model_west)
 
+# create regression model of hospitalizations in south
 black_model_south <- lm(Data_Value ~ Break_Out + in_south, data = black_only)
 tidy(black_model_south)
 
@@ -290,7 +291,10 @@ tidy(hisp_model_west)
 hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
 tidy(hisp_model_south)
 ```
+$$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals in\ West\ Coast = 33.979 + Non-Hispanic\ White -10.9035 + in\_west$$
 
+$$Hospitalizations\ of\ Hispanics\ in\ West\ Coast = 27.273 - 4.257\ *\ Non-Hispanic\ White\ -7.619\ *\ in\_west$$
+$$Hospitalizations\ of\ Hispanics\ in\ South = 24.558 + Non-Hispanic\ White -4.218 + in\_south$$
 From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
 
 ### Can we predict the rate of Hospitalizations for people of different races based on their location?
@@ -346,19 +350,20 @@ hisp_split <- initial_split(hisp_only, prop=0.8)
 hisp_train<-training(hisp_split)
 hisp_test <- testing(hisp_split)
 
-# fit a model for Non-Hispanic African Americans in west
+# fit a model for Hispancs in west
 hisp_fit <- lm(Data_Value ~ Break_Out + in_west, data = hisp_train)
 tidy(hisp_fit)
 
+# predict values and reshape dataset
 hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-#head(hisp_pred)
-
+# filter for only Hispanic data
 hisp_pred <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
 
+# get RSME 
 west_hisp <- rmse(hisp_pred, truth = Data_Value, estimate = pred)
 west_hisp
 # fit model for those in the south
@@ -369,7 +374,6 @@ hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-#head(hisp_pred_south)
 
 hisp_pred_south <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
@@ -377,6 +381,7 @@ hisp_pred_south <- hisp_pred %>%
 south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
 south_hisp
 ```
+
 
 ```{r hisp-RMSE-result, echo=FALSE}
 west_hisp
@@ -673,9 +678,7 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-Linear model for age and cardiovascular disease:
-
-*Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
 
 The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
 
@@ -720,14 +723,6 @@ ggplot(data=model1_age_aug,
   labs(title="Residual Plot for model1_age_aug",
        x="Predicted Values for Data_Value",
        y="Residuals")
-
-## Examine specific Variable for Insight on Distribution of Residuals
-## ggplot(data=model1_age_aug %>% 
-##         filter(Age=="65+", Topic=="Stroke"), 
-##       mapping=aes(x=.fitted,
-##                   y=.resid)) +
-##  geom_point() +
-##  geom_hline(yintercept=0,color="red")
 
 ## Evaluate model
 model1_age_pred <- predict(model1_age, age_test) %>% 
