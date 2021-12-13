@@ -616,7 +616,11 @@ TukeyHSD(one.way)
 summary(one.way)
 ```
 
-According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts: 1. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant. 2. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
+According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts:
+
+1\. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant.
+
+2\. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
