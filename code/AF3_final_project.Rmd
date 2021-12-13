@@ -392,7 +392,7 @@ south_hisp
 
 The RMSEs for the models of Hospitalizations of African Americans in the west south was found to be 14.88525 while for Hispanics it was 22.4447. These values are exceptionally high, meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
 
-\#\#\#RMSE for Models of Hispanics Black in the West and South
+#### RMSE for Models of Hispanics and African Americans in the West and South
 
 ```{r hisp-RMSE-result, echo=FALSE}
 west_hisp
@@ -514,9 +514,9 @@ gender_high_rates <- cms_data %>%
   ))
 
 ## Count observations in filtered data frame
-gender_high_rates %>%
-  filter(High_Rate == "yes") %>% 
-  count()
+## gender_high_rates %>%
+##  filter(High_Rate == "yes") %>% 
+##  count()
 
 ## Get proportion of yes vs no high rates of heart failure hospitalizations based on Gender
 prop_gender_high_rates <- gender_high_rates %>% 
@@ -572,7 +572,7 @@ gender_high_pvalue <- gender_high_boot_diff_prop %>%
   get_p_value(obs_stat=obs_diff, direction="greater")
 ```
 
-At a 1% level of significance the p-value must be \>= 0.01 to draw a conclusion, which is rejecting the null hypothesis. Since the p-value is extremely small (p-value = `r gender_high_pvalue`) and is less than 0.01, we are provided with strong evidence to reject the null hypothesis that gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Furthermore, we can conclude that our data provides strong evidence that in the population of patients our data is sampled from, males are adversely impacted by high rates of heart failure related hospitalizations in proportion to females.
+At a 1% level of significance the p-value must be \>= 0.01 to draw a conclusion, which is rejecting the null hypothesis. Since the p-value is extremely small (p-value = `r gender_high_pvalue`) and is less than 0.01, we are provided with strong evidence to reject the null hypothesis that gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Furthermore, we can conclude that our data provides strong evidence that in the population of patients our data is sampled from, males are adversely impacted by high rates of heart failure related hospitalizations on average in proportion to females.
 
 Although observations can be made about the association between gender and heart failure rates based on initial visualizations, it is erroneous to explicitly state a relationship without statistical reasoning. In the analysis comparing gender and high rates of heart failure hospitalizations, consequently, evidence is given to support or refute initial claims. Using bootstrapping and a difference of proportions test, the null hypothesis stating: "gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations" was ultimately rejected due to the p-value being extremely small, which illustrates statistical significant against the null hypothesis. There are still issues pertaining to the validity of our data and analysis, however, as this data frame represents a small proportion (Medicare & Medicaid patients) of the larger U.S demographic. The influence of confounding variables, furthermore, can skew analyses and create unreliable conclusions. In this analysis, for example, the influence of unaccounted predictor variables such as age or ethnicity can create false conclusions. If statistical analysis on this research question were to be reconducted, it is essential to incorporate other unique data sets on cardiovascular disease to see if insights are consistent.
 
@@ -642,14 +642,15 @@ According to a One-Way Analysis of Variance performed on the data, we can, with 
 
 Due to the of the results of the one-way analysis of variance, we can reject the null hypothesis, which was that there is no relationship between heart failure hospitalizations and geographical region of the U.S. Instead, we can accept the alternative hypothesis, which was that there is indeed a strong relationships between heart failure hospitalizations and U.S. geographical region. More specifically, this choice is evidenced by the majority of adjusted p-values being statistically significant (14/15 are less than 0.01), as well as the f-value being far greater than 1 (123.2). However, although the data set used was rather large, if this test were to be reperformed in order to ensure or enhance the validity of the results, it is important that a different population of U.S. residents be used, as that would help prove that these findings are not based on coincidence.
 
-### Does age influence Cardiovascular Disease and Hospitalizations?
+### Does Age influence the prevalence of Cardiovascular Disease among Hospitalizations?
 
 Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
 ```{r data-preparation1, echo=FALSE}
 age_comparison <- cms_data %>% 
   filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>%
-  rename(Age = "Break_Out")
+  rename(Age = "Break_Out") %>% 
+  filter(Data_Value_Unit == "Percent (%)")
 ```
 
 ```{r general-summary1, echo=FALSE, message=FALSE}
@@ -664,10 +665,10 @@ age_only <- age_comparison %>%
             sd_percentage = sd(Data_Value),
             iqr_percentage = IQR(Data_Value)) %>% 
   arrange(Age)
-glimpse(age_only)
+head(age_only, n=12)
 ```
 
-From looking between the mean and median for each disease topic and from two age groups, all of the mean and median don't have a significant difference, so it means in the sample it does not have many outliers for the cardiovascular diseases in the data set. However, in age group 65+, with Major Cardiovascular Diseases, have the greatest standard deviation and IQR among other diseases in all age group, so it means for this disease, its sample is more spread out than the other diseases.
+Looking at the mean and median values for each disease topic and two age groups, the difference between demographics and outliers are minimal in this cardiovascular disease data set. However, in the age 65+ group with Major Cardiovascular Diseases, there was the greatest standard deviation and IQR among other diseases in all age group. Therefore, the observations for this sample is more spread out compared to other diseases (eg. Stroke).
 
 ```{r topic-vs-age-box-plot, echo=FALSE}
 ## New facet label names for diseases
@@ -683,11 +684,11 @@ ggplot(data = age_comparison,
        mapping = aes(x = Age, y = Data_Value, fill = Age)) +
   geom_boxplot() +
   facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
-  labs(title = "Percentage of different diseases across different age group",
+  labs(title = "Distribution of Percentage of Cardiovascular Disease Prevalence across Age Groups",
        y = "Percentage")
 ```
 
-From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+, from this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+, so in this sense, the age group of 75+ generally have more higher percentage samples than the group of age 65+, except for Coronary Heart Disease, the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the agr group of 65+.
+From the graphs, we can see that there is a relationship between age and heart diseases. For most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+. From this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+. In this sense, the age group of 75+ generally have higher percentage samples than the group of age 65+, except for Coronary Heart Disease; the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the age group of 65+.
 
 ```{r linear-modeling, echo=FALSE}
 ## Set up a linear model to compare relationship using original age_comparison data frame
@@ -695,11 +696,11 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-Linear model for age and cardiovascular disease:
+Linear effects model for age and prevalence (%) of cardiovascular disease among hospitalizations:
 
-*Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+*Prevalence (%) of Cardiovascular Heart Disease among Hospitalizations= 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
 
-The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
+The baseline for this model is Acute Myocardial Infarction (Heart Attack) and age 65+, and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634. When Coronary Heart Disease is true (value of 1), the percentage will add by 3.906 on top of 2.634 baseline value. If Disease of the Heart is true, the percentage will add 15.069 on top of 2.634. If Heart Failure is true, the percentage will add 2.067 on top of 2.634. If Major Cardiovascular Disease is true, the percentage will add 20.930 on top of 2.634. If Stroke is true, the percentage will add 0.885 on top of 2.634. Lastly, if the observed patient is in the age group of 75+, the percentage will add 0.488 on top of 2.634; although it is a minor change, being in the 75+ age group increases the likelihood of cardiovascular disease prevalence for all hospitalizations by 0.488 percent on average.
 
 ```{r spliting-data, echo=FALSE, message=FALSE}
 ## Set seed to 8239
@@ -759,9 +760,9 @@ model1_age_pred_rmse <- rmse(model1_age_pred, truth=Data_Value, estimate=pred)
 ## tidy(model1_age)
 ```
 
-Splitting the age_comparison data into a training set with the size of 70% and a test set with the size of 30%, we get marginally different computations in comparison to the original linear effects model. The adjusted r squared for this training model is `r train_rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model. Furthermore, the predicted rmse value for the split data frame is `r model1_age_pred_rmse`, which is relatively low and illustrates that age and topics are good predictors for percent composition of cardiovascular disease.
+Splitting the age_comparison data into a training set with the size of 70% and a test set with the size of 30%, we get marginally different computations in comparison to the original linear effects model. The adjusted r squared for this training model is `r train_rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model. Furthermore, the predicted rmse value for the split data frame is `r model1_age_pred_rmse`, which is relatively low and illustrates that age and topics are good predictors for percent composition of cardiovascular disease prevalence among hospitalizations.
 
-Since the r squared of the linear model shows that our linear model is significant, and from the linear model, we can tell that different types of diseases have their impact on the percentage of the people, however, comparing with all the diseases, the impact of the age on the percentage of people having the diseases will be relatively insignificant than the others, in this data set, it will be between age group of 65+ and 75+. However, even though it shows that there isn't a strong relationship between age and cardiovascular diseases, there are not other samples from other age groups other than age of 65+ and 75+ to tell us the difference. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and cardiovascular diseases and hospitalizations.
+Since the adjusted r squared of the linear effects model shows that our linear model is significant, we can tell that different types of cardiovascular diseases have varying impacts on the prevalence of cardiovascular disease among hospitalized patients. Comparing with all the diseases, however, the impact of age demographics (65+ vs. 75+) on the percentage of people having cardiovascular diseases will be relatively insignificant compared to others. Even though it shows that there isn't a strong relationship between age and cardiovascular disease prevalence, there are not enough samples from other age groups to tell us the true impacts of age on cardiovascular disease prevalence. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and prevalence of cardiovascular diseases among hospitalizations.
 
 ## Conclusion
 
