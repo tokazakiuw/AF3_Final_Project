@@ -1,0 +1,769 @@
+---
+title: "Prevention is Better than Cure—Statistical Observations of Cardiovascular Disease Data"
+author: "Ty Kentaro Okazaki, Matthew R Herradura, David Xie, Carson Klein"
+date: "`r Sys.Date()`"
+output: openintro::lab_report
+---
+
+```{r load-packages, message=FALSE, echo=FALSE}
+#install.packages("tidymodels")
+library(tidyverse)
+library(openintro)
+library(infer)
+library(broom)
+library(tidymodels)
+```
+
+```{r load-data, message=FALSE, echo=FALSE}
+cms_data <- read.csv("../data/cms_data.csv")
+
+cms_data <- cms_data %>%
+## Drop Unnecessary Columns
+  select(-c("LocationDesc", "DataSource", "Category", "Data_Value_Type", "Data_Value_Alt", "Data_Value_Footnote_Symbol", "Data_Value_Footnote", "CategoryId", "TopicId", "IndicatorID", "Data_Value_TypeID", "BreakOutCategoryId", "BreakOutId"))
+
+cms_data$Data_Value <- as.numeric(cms_data$Data_Value)
+```
+
+## Introduction
+
+Cardiovascular disease susceptibility and related hospitalizations is a crucial topic of research because it is intertwined with our lifestyle and consequent life expectancy. From statistical data provided by [*Centers for Disease Control and Prevention (CDC)*](https://www.cdc.gov/heartdisease/facts.htm), it shows that **one person dies every 36 seconds** in the United States from cardiovascular disease; furthermore, about 659,000 people in United States die from heart diseases, which is about 1 in every four deaths. Considering the emerging epidemic that is cardiovascular disease in the developing world, having adequate treatments are essential to reducing symptoms and mortality. However, treatments for cardiovascular disease are expensive, lengthy, are often not adequate to helping patients in need. In order to fight this emerging epidemic, it is essential to educate individuals on the factors that increases their susceptibility for cardiovascular disease. Likewise, since cardiovascular disease is so dangerously common, it interests us to discover more about cardiovascular disease's relationship between predictor variables, such as location, age, race, and gender.
+
+Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general research question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease and hospitalization rates? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease and hospitalization rates?
+
+```{r introduction-stats, echo=FALSE, include=FALSE}
+## Summarize the mean and median value by Predictor Variables and Percent
+variable_stats_percent <- cms_data %>% 
+  filter(Data_Value_Unit=="Percent (%)", Indicator=="Prevalence of major cardiovascular disease hospitalizations among all hospitalizations, US Medicare FFS beneficiaries (65+)") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+  )
+variable_stats_percent
+```
+
+```{r introduction-visualization, echo=FALSE}
+## Histogram plot visualizing the distribution of Data_Value faceted by Break_Out by Rate
+faceted_plot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<40, Data_Value_Unit=="Percent (%)"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 2) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Data_Value for all Years (2004-2013)",
+                         subtitle="Faceted by Break_Out (various predictor variables)",
+                         x="Data_Value")
+faceted_plot_rate
+```
+
+#### Code Book
+
+This data set includes instances of cardiovascular disease (CVD), potential indicators, and associated risk factors for Medicare and Medicaid patients across the United States.
+
+Dimensions of the `cms_data` data frame (after cleaning).
+
+-   Rows/Observations: 42,640
+
+-   Columns/Variables: 16
+
+```{r glimpse-data, include=FALSE}
+glimpse(cms_data)
+```
+
+A description of the variables is below:
+
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| Variable Name         | Description                                                                                                   | Data Type  |
++=======================+===============================================================================================================+============+
+| `Year`                | Year                                                                                                          | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Topic`               | Topic description                                                                                             | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Indicator`           | Indicator description                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `Break_Out`           | Break out group description                                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `LocationId`          | Location lookup value                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+| `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
+
+## Analysis
+
+In this section, we will analyze the data to address various research questions
+
+### How is race related to Cardiovascular Disease and Hospitalizations?
+
+```{r race-initial-analysis, echo=FALSE}
+# filter categories for race 
+# filter for NA values
+
+# get race data and averages for cardiovascular hospitalizations
+race_data <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
+  group_by(Break_Out) %>%
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value),
+    #topic = count(Topic)
+  )
+
+# show data
+race_data
+
+# get hispanic average value
+hispanic_mean <- race_data %>%
+  filter(Break_Out == "Hispanic") %>%
+  pull(mean_value)
+
+# get African American average value
+black_mean <- race_data %>%
+  filter(Break_Out == "Non-Hispanic Black") %>%
+  pull(mean_value)
+
+# get white average value
+white_mean <- race_data %>%
+  filter(Break_Out == "Non-Hispanic White") %>%
+  pull(mean_value)
+
+# get difference from African Americans to White Americans
+black_diff <- black_mean - white_mean
+
+# get difference from Hispanics to White Americans
+hisp_diff <- hispanic_mean - white_mean
+```
+
+```{r race-hist, echo=FALSE}
+ggplot(race_data, aes(x = Break_Out, y = mean_value)) + 
+  geom_bar(stat = "identity") + 
+  labs(x = "Race", y = "Average Rate per 1000")
+
+ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Race", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot() + 
+                    labs(title = "Boxplot of Hospitalizations", x = "Race", y = "Average Rate per 1,000")
+
+```
+
+From looking at preliminary statistics and visuals, relationships between the rate of major cardiovascular disease hospitalizations can be seen among different races in the United States. From the data, it shows that Hispanics and Non-Hispanic Black individuals face more hospitalizations in comparison to Non-Hispanic white individuals. Looking at the data collected from 2004 - 2013, on average, about `r hispanic_mean` (per 1000 people) Hispanic individuals are hospitalized for cardiovascular diseases while `r black_mean` Non-Hispanic African Americans are hospitalized for the same reasons. These rates are considerably higher in comparison to the rate of White Americans per 1000 people where only about `r white_mean` individuals are hospitalized. This means that per 1000 people, about `r black_diff` more African Americans and `r hisp_diff` more Hispanics normally find themselves affected by cardiovascular disease.
+
+#### **How much more affected by Cardiovascular Disease Hospitalizations are Hispanics and Non-Hispanic Black individuals compared to Non-Hispanic Whites?**
+
+**Null Hypothesis: Being a Hispanic or Non-Hispanic Black individual does not increase the risk of being hospitalized for Cardiovascular Disease in the US.**
+
+**Alternative Hypothesis: Being a Hispanic or Non-Hispanic Black individual does increase the risk of being hospitalized for Cardiovascular Disease in the US.**
+
+```{r race-analysis, echo = FALSE}
+avg_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit == "Rate per 1,000") %>%
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
+  group_by(LocationAbbr, Break_Out) %>%
+  summarize(mean = mean(Data_Value),
+            median = median(Data_Value)) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ "yes", TRUE ~ "no"
+  ),
+  in_west = case_when(
+    LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ "yes", TRUE ~ "no"
+  ))
+  
+head(avg_mean)
+
+# Find confidence interval/difference in means
+# Do hypothesis testing 
+
+```
+
+```{r diff_in_means_black, echo = FALSE}
+set.seed(5734)
+black_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Non-Hispanic Black", "Non-Hispanic White")) %>%
+  group_by(Break_Out) %>%
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Non-Hispanic Black", "Non-Hispanic White"))
+  
+head(black_boot_diff_mean)
+black_ci <- get_confidence_interval(black_boot_diff_mean)
+black_ci
+
+black_boot_diff_mean %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Whites and African Americans") +
+  shade_p_value(obs_stat=black_ci$upper_ci, direction="both")
+
+```
+
+```{r diff_in_means_hisp, echo = FALSE}
+set.seed(5734)
+hisp_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Hispanic", "Non-Hispanic White")) %>%
+  group_by(Break_Out) %>%
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Hispanic", "Non-Hispanic White"))
+  
+head(hisp_boot_diff_mean)
+hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
+hisp_ci
+
+hisp_boot_diff_mean %>% 
+  visualize() +
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Whites and Hispanics") +
+  shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
+
+```
+
+We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher. Furthermore, using the p-value of 0 found from both differences in means, we reject the null and accept the alternative hypothesis stating that being a Hispanic or Non-Hispanic Black individual does increase the risk of being hospitalized for Cardiovascular Disease in the US.
+
+#### Can we predict the rate of Hospitalizations for people of different races based on their location?
+
+```{r race-modeling, echo=FALSE}
+
+# create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
+# Add new columns listing what states are in west coast and south
+black_only <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Non-Hispanic Black", "Non-Hispanic White")) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ 1, TRUE ~ 0
+  ),
+  in_west = case_when(
+     LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
+  )) 
+  
+  
+black_model_west <- lm(Data_Value ~ Break_Out + in_west, data = black_only)
+tidy(black_model_west)
+
+black_model_south <- lm(Data_Value ~ Break_Out + in_south, data = black_only)
+tidy(black_model_south)
+
+```
+
+```{r hisp-modeling, echo=FALSE}
+
+# Create new data frame for Hispanics and Non-Hispanic Whites
+# Add new columns listing what states are in west coast and south
+hisp_only <- cms_data %>%
+  filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  filter(Break_Out %in% c("Hispanic", "Non-Hispanic White")) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ 1, TRUE ~ 0
+  ),
+  in_west = case_when(
+     LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
+  ))
+
+# create regression model for Hispanics compared to Non-Hispanic Whites when in the west
+hisp_model_west <- lm(Data_Value ~ Break_Out + in_west, data = hisp_only)
+tidy(hisp_model_west)
+
+# create regression model for Hispanics compared to Non-Hispanic Whites when in the south
+hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
+tidy(hisp_model_south)
+```
+
+From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
+
+#### Can we predict the rate of Hospitalizations for people of different races based on their location?
+
+$$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ West\ Coast = 33.979\ -\ 10.9035\ *\ Non-Hispanic\ White\ -\ 7.893033\ *\ in\_west$$ $$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ South = 31.030483 \ -\ -10.916\ *\ Non-Hispanic\ White\ +\ 4.195183   \ *\ in\_west$$
+
+$$Hospitalizations\ of\ Hispanics\ in\ West\ Coast = 27.273 - 4.257\ *\ Non-Hispanic\ White\ -\ 7.619\ *\ in\_west$$ $$Hospitalizations\ of\ Hispanics\ in\ South = 24.558 + Non-Hispanic\ White -4.218 + in\_south$$ From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. The difference of \~10 people in the rate of African Americans compared to White Americans and the difference of \~4 people of Hispanics compared to White Americans is also consistent with the values found in our 95% confidence interval. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
+
+#### RMSE for the Models of Hospitalization of African Americans and Hispanics
+
+```{r RMSE, echo=FALSE, include=FALSE}
+
+# split the data into testing and training sets
+set.seed(232)
+black_split <- initial_split(black_only, prop=0.8)
+black_train<-training(black_split)
+black_test <- testing(black_split)
+
+# fit a model for Non-Hispanic African Americans in west
+black_fit <- lm(Data_Value ~ Break_Out + in_west, data = black_train)
+tidy(black_fit)
+
+black_pred <- predict(black_fit, newdata=black_test) %>%
+  bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+black_pred <- black_pred %>%
+  filter(Break_Out == "Non-Hispanic Black")
+
+west <- rmse(black_pred, truth = Data_Value, estimate = pred)
+west
+# fit model for those in the south
+black_fit_south <- lm(Data_Value ~ Break_Out + in_south, data = black_train)
+tidy(black_fit)
+
+black_pred_south <- predict(black_fit_south, newdata=black_test) %>%
+  bind_cols(black_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+
+
+black_pred_south <- black_pred %>%
+  filter(Break_Out == "Non-Hispanic Black")
+
+south <- rmse(black_pred_south, truth = Data_Value, estimate = pred)
+south
+
+```
+
+```{r hisp-RMSE, echo = FALSE, include=FALSE}
+# split the data into testing and training sets
+set.seed(232)
+hisp_split <- initial_split(hisp_only, prop=0.8)
+hisp_train<-training(hisp_split)
+hisp_test <- testing(hisp_split)
+
+# fit a model for Non-Hispanic African Americans in west
+hisp_fit <- lm(Data_Value ~ Break_Out + in_west, data = hisp_train)
+tidy(hisp_fit)
+
+hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
+  bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+#head(hisp_pred)
+
+hisp_pred <- hisp_pred %>%
+  filter(Break_Out == "Hispanic")
+
+west_hisp <- rmse(hisp_pred, truth = Data_Value, estimate = pred)
+west_hisp
+# fit model for those in the south
+hisp_fit_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_train)
+tidy(hisp_fit)
+
+hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
+  bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
+  rename(pred = ...1)
+
+#head(hisp_pred_south)
+
+hisp_pred_south <- hisp_pred %>%
+  filter(Break_Out == "Hispanic")
+
+south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
+south_hisp
+```
+
+The RMSEs for the models of Hospitalizations of African Americans in the west south was found to be 14.88525 while for Hispanics it was 22.4447. These values are exceptionally high, meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
+
+#### RMSE for Models of Hispanics and African Americans in the West and South
+
+```{r hisp-RMSE-result, echo=FALSE}
+west_hisp
+south_hisp
+```
+
+The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
+
+At the beginning of this research question we inquired about the relationship between race and cardiovascular hospitalizations in the US. Looking at the average rates, medians, and visuals of Hispanics and Non-Hispanic Black Individuals compared to Non-Hispanic Whites, it is clear these races suffer from a higher rate of cardiovascular hospitalizations. At a 95% confidence level, we found that a higher number of Hispanics and a significantly larger amount of African Americans are hospitalized for cardiovascular issues compared to Caucasians. With a p-value of 0, the differences between each group was significant, meaning that we did reject a null and found that being Hispanic or Black has a relationship with higher rates of hospitalization. Furthermore, attempting to predict these numbers with linear models might be possible, however, within this data set there are not enough statistics of the possible variables involved that would help us create that sort of predictor.
+
+### Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?
+
+```{r stat-analysis-gender-1, echo=FALSE}
+## Summarize the mean, median, IQR, and sd by Gender and Rate
+gender_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+    iqr_value = IQR(Data_Value),
+    sd_value = sd(Data_Value)
+  )
+gender_stats_rate
+
+## Summarize the mean, median by Rate (not grouped by Gender)
+all_gender_stats_rate <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  summarize(
+    mean_value = mean(Data_Value),
+    median_value = median(Data_Value),
+  )
+## all_gender_stats_rate
+```
+
+```{r visual-analysis-gender-1, echo=FALSE, include=FALSE}
+## Not included for space concerns.
+faceted_gender_plot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Data_Value_Unit=="Rate per 1,000", Break_Out_Category=="Gender"),
+                        mapping=aes(x=Data_Value)) +
+                    geom_histogram(binwidth = 6) +
+                      facet_wrap(~Break_Out) +
+                    labs(title="Distribution of Hospitalizations with Heart Failure as the Principal Diagnosis for all Years (2004-2013)",
+                         subtitle="Faceted by Gender (Female vs. Male)",
+                         x="Hospitalizations with Heart Failure as the Principal Diagnosis")
+faceted_gender_plot_rate
+```
+
+```{r visual-analysis-gender-2, echo=FALSE}
+## Boxplot displaying relationship between gender and Data_Value for all observations (2004-2013) by Rate
+gender_boxplot_rate <- ggplot(data=cms_data %>% 
+                       filter(!is.na(Break_Out), !is.na(Data_Value), Data_Value<100, Break_Out_Category=="Gender", Data_Value_Unit=="Rate per 1,000"),
+                        mapping=aes(y=Data_Value, x=Break_Out, fill=Break_Out)) +
+                    geom_boxplot() +
+                    labs(title="Comparing relationship between Hospitalizations with Heart Failure as the Principal Diagnosis and Gender",
+                         subtitle="All observed data from years: 2004-2013",
+                         y="Hospitalizations with Heart Failure as the Principal Diagnosis",
+                         x="Gender",
+                         fill="Gender")
+gender_boxplot_rate
+```
+
+Based on these initial statistics and visualizations depicted above, associations between heart failure hospitalizations and gender can be observed. When observing the box plot visualization comparing Female and Male rates of heart failure hospitalizations using `Data_Value`, for example, we see the median `Data_Value` rate for males is slightly higher on average with a value of 21.00 when compared to a median rate of 17.65 for females; furthermore, the mean `Data_Value` rate for males is around 24.95, and 20.60 for females.
+
+```{r gender-difference-in-mean analysis, echo=FALSE}
+## Visualize the bootstrap distribution of difference in mean value between Males and Females
+## Set seed to 8253
+set.seed(8253)
+
+## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
+gender_boot_diff_mean <- cms_data %>%
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  group_by(Break_Out) %>% 
+  specify(Data_Value ~ Break_Out) %>%
+  generate(reps = 1000, type = "bootstrap") %>%
+  calculate(stat = "diff in means",
+  order=c("Male", "Female"))
+head(gender_boot_diff_mean)
+
+## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
+gender_ci <- gender_boot_diff_mean %>% 
+  summarize(mean=mean(stat),
+            lower=quantile(stat, 0.025),
+            upper=quantile(stat, 0.975))
+gender_ci
+
+## Visualize the bootstrap distribution of the difference in mean value between Males and Females
+gender_boot_diff_mean %>% 
+  visualize()+
+  labs(title="1000 bootstraps of the difference in means",
+       subtitle="95% confidence interval",
+       y="count",
+       x="Bootstrapped difference in mean value between Males and Females") +
+  shade_p_value(obs_stat=gender_ci$upper, direction="both")
+```
+
+To further analyze the disparity in the mean hospitalization rates, the distribution and frequency of the bootstrapped difference in mean `Data_Value` between males and females can be visualized above. Using calculations, furthermore, the lower and upper bounds of a 95% bootstrap confidence interval are about 3.4801 and 5.2598 respectively. This illustrates that we are 95% confident that the true parameters (average difference in mean value between males and females for hospitalized Medicaid & Medicare patients with Heart Failure as the principal diagnosis in 2004-2013, across the US) is within the random bounds 3.4801 and 5.2598. The 95% confidence interval is also depicted on the histogram by the red vertical line illustrating the upper limit and the red-shaded regions (values outside random bounds 3.4801 and 5.2598). From the collective statistics and visualizations illustrating the relationship between heart failure hospitalizations and gender, observations can be made about the high hospitalization rates for males in respect to females.
+
+Consequently, we can specify our general research question by asking and answering the following:
+
+**Are Males more Susceptible (in comparison to Females) to High Rates of Hospitalizations with Heart Failure as the Principal Diagnosis?**
+
+**Null Hypothesis**: Gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, the variables `Break_Out` (Gender) and `High_Rate` are independent: the difference in proportion between Genders for high rates of heart failure related hospitalizations are equal to 0 (high_rate_proportion Male == high_rate_proportion Female) .
+
+**Alternative Hypothesis**: Gender will influence a patient's susceptibility for high rates of heart failure related hospitalizations. Specifically, males will be adversely impacted by high rates of heart failure related hospitalizations in proportion to females. The difference in proportion between males and females for high rates of heart failure related hospitalizations are greater than zero (proportion Male\>proportion Female).
+
+```{r gender-statistical-analysis-setup, echo=FALSE}
+## Create new dataframe by Gender and high rates of heart failure hospitalizations
+## Mutate new boolean column describing whether High_Rate == "yes" or "no".
+gender_high_rates <- cms_data %>% 
+  filter(Break_Out_Category == "Gender", Data_Value_Unit=="Rate per 1,000") %>% 
+  filter(!is.na(Break_Out), !is.na(Data_Value)) %>% 
+  mutate(High_Rate = 
+           case_when(Data_Value < 50 ~ "no",
+                     Data_Value >= 50 ~"yes"
+  ))
+
+## Count observations in filtered data frame
+## gender_high_rates %>%
+##  filter(High_Rate == "yes") %>% 
+##  count()
+
+## Get proportion of yes vs no high rates of heart failure hospitalizations based on Gender
+prop_gender_high_rates <- gender_high_rates %>% 
+  group_by(Break_Out) %>% 
+  summarize(
+    prop_yes = mean(High_Rate == "yes"),
+    prop_no = mean(High_Rate == "no")
+  )
+prop_gender_high_rates
+
+## Get the observed difference of proportion of yes to high rates of heart failure hospitalizations for Males - Females
+obs_diff <- prop_gender_high_rates %>% 
+  select(prop_yes) %>% 
+  summarize(obs_diff=max(prop_yes) - min(prop_yes)) %>% 
+  select(obs_diff) %>% 
+  unlist()
+obs_diff
+```
+
+In this analysis, a bootstrap difference in proportions can be used to gain insights on the null/alternative hypothesis. This method of statistical analysis is appropriate for this research question because it seeks to compare the relationship between two variables (high heart failure rates and gender) and justification for rejecting/failing to reject our null hypothesis. Setting the infrastructure for analysis, a new column (variable) called `High_Rate` can be created which categorizes observations by a boolean expression which denotes whether the rate of heart failure observed was high or not high ("yes"/"no"). `High_Rate` specifically describes whether an observation had a heart failure rate greater than or equal to 50 for gender observations (if `Data_Value` \>= 50, `High_Rate` == "yes"). Subsequently, this new variable can be compared with gender to highlight whether the differences in proportion were statistically significant enough to suggest that `High_Rate` and gender are related. Considering the null hypothesis, we assume these variables are unrelated and expect the difference in proportions to equal 0 (equal proportion of High_Rate between gender).
+
+```{r gender-statistical-setup, echo=FALSE}
+## Visualize the bootstrap distribution of difference in mean value between Males and Females
+## Set seed to 2364
+set.seed(2364)
+
+## Calculate 1000 different resamples of data and calculate the difference in mean value between Males and Females
+gender_high_boot_diff_prop <- gender_high_rates %>%
+  specify(High_Rate ~ Break_Out, success = "yes") %>%
+  hypothesize(null = "independence") %>% 
+  generate(reps = 5000, type = "permute") %>%
+  calculate(stat = "diff in props",
+            order=c("Male", "Female"))
+head(gender_high_boot_diff_prop)
+
+## Give the lower and upper bounds of a 95% bootstrap confidence interval for gender_boot_diff_mean
+gender_high_ci <- gender_high_boot_diff_prop %>% 
+  summarize(mean=mean(stat),
+            lower=quantile(stat, 0.005),
+            upper=quantile(stat, 0.995))
+gender_high_ci
+
+## Visualize the bootstrap distribution of the difference in mean value between Males and Females
+gender_high_boot_diff_prop %>% 
+  visualize()+
+  labs(title="5000 bootstraps of the difference in proportions",
+       y="count",
+       x="Bootstrapped difference in proportion between Males and Females for high rates of heart failure hospitalizations (binary)") +
+  shade_p_value(obs_stat=obs_diff, direction="greater")
+
+## Calculate the p-value associated with null hypothesis of independence and alternative hypothesis of Males having high proportion of heart failure related hospitalizations.
+gender_high_pvalue <- gender_high_boot_diff_prop %>% 
+  get_p_value(obs_stat=obs_diff, direction="greater")
+```
+
+At a 1% level of significance the p-value must be \>= 0.01 to draw a conclusion, which is rejecting the null hypothesis. Since the p-value is extremely small (p-value = `r gender_high_pvalue`) and is less than 0.01, we are provided with strong evidence to reject the null hypothesis that gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Furthermore, we can conclude that our data provides strong evidence that in the population of patients our data is sampled from, males are adversely impacted by high rates of heart failure related hospitalizations on average in proportion to females.
+
+Although observations can be made about the association between gender and heart failure rates based on initial visualizations, it is erroneous to explicitly state a relationship without statistical reasoning. In the analysis comparing gender and high rates of heart failure hospitalizations, consequently, evidence is given to support or refute initial claims. Using bootstrapping and a difference of proportions test, the null hypothesis stating: "gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations" was ultimately rejected due to the p-value being extremely small, which illustrates statistical significant against the null hypothesis. There are still issues pertaining to the validity of our data and analysis, however, as this data frame represents a small proportion (Medicare & Medicaid patients) of the larger U.S demographic. The influence of confounding variables, furthermore, can skew analyses and create unreliable conclusions. In this analysis, for example, the influence of unaccounted predictor variables such as age or ethnicity can create false conclusions. If statistical analysis on this research question were to be reconducted, it is essential to incorporate other unique data sets on cardiovascular disease to see if insights are consistent.
+
+### Is there a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.?
+
+```{r data-preparation, echo=FALSE}
+cms_filter <- cms_data %>% 
+  filter(!is.na(Data_Value), LocationAbbr != "US") %>%
+  mutate(Region = as.factor(ifelse(LocationAbbr %in% c("WA", "OR", "CA", "AK", "HI"), 'Pacific',
+                          ifelse(LocationAbbr %in% c("MT", "ID", "WY", "NV", "UT", "CO"), 'Rocky Mountain', 
+                          ifelse(LocationAbbr %in% c("AZ", "NM", "OK", "TX"), 'southwest', 
+                          ifelse(LocationAbbr %in% c("ND", "SD", "NE", "KS", "MN", "IA", "MO", "WI", "IL", "MI", "IN", "OH"), 'Midwest',
+                          ifelse(LocationAbbr %in% c("AR", "LA", "KY", "TN", "MS", "AL", "WV", "VA", "NC", "SC", "GA", "FL"), 'Southeast',
+                          ifelse(LocationAbbr %in% c("NY", "PA", "MD", "DC", "NJ", "DE", "VT", "MA", "CT", "NH", "RI", "ME"), 'Northeast', 0))))))))
+```
+
+Here is a preliminary data summary of the data set comparing the relationship between geographic location and different types of heart diseases.
+
+```{r general-summary, echo=FALSE, message=FALSE}
+cms_summary <- cms_filter %>% 
+  group_by(Topic, Region) %>% 
+  summarize(mean_percentage = mean(Data_Value),
+            median_percentage = median(Data_Value),
+            max_percentage = max(Data_Value),
+            min_percentage = min(Data_Value),
+            iqr_percentage = IQR(Data_Value)) %>% 
+  arrange(Region)
+cms_summary %>% filter(Topic == "Heart Failure")
+
+ggplot(data = cms_summary,
+       mapping = aes(x = Region, y = mean_percentage, color = Topic)) +
+  geom_point() +
+  labs(title = "Average Percentages of Cardiovascular Diseases by U.S. Geographical Region",
+       subtitle = "Data collected from 2004-2013",
+       y = "Average Percentage")
+```
+
+Of the six conditions shown on this preliminary plot, five of them do not appear to have significant variance in average percentages depending on the region of the U.S. the data is sourced from. The only condition that appears to be affected by the region is Heart Failure. As a result of this observation, the rest of this subsection will focus primarily on this apparent relationship between Heart Failure and U.S. geographical region.
+
+**Null Hypothesis: There is no relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.**
+
+**Alternative Hypothesis: There is a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.**
+
+```{r topic-vs-region-box-plot, echo=FALSE}
+cms_hf <- cms_filter %>% filter(Topic == "Heart Failure")
+ggplot(data = cms_hf %>% filter(Data_Value < 150),
+       mapping = aes(x = Data_Value, fill = Region)) +
+  geom_boxplot() +
+  labs(title = "Percentages of Heart Failure by Region of U.S.",
+       subtitle = "Data collected from 2004-2013",
+       x = "Percentage of Heart Failure")
+```
+
+Based on the medians, ranges, and interquartile ranges of the data as shown by the box plots, it would be fair to say that people living in the Southeast region of the United States appear to, on average, have a notably higher percentage of heart failure than those who live in the Rocky Mountain region of the United States. More specifically, the median of 18.7, the IQR of 22.7, and the range of 212.9 for the Southeast Region are all significantly higher than the comparable values of the Rocky Mountain region, which are 10.1, 12.825, and 136, respectively.
+
+```{r analysis-of-variance, echo=FALSE}
+one.way <- aov(Data_Value ~ Region, data = cms_hf)
+TukeyHSD(one.way)
+summary(one.way)
+```
+
+According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts:
+
+1\. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant.
+
+2\. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
+
+Due to the of the results of the one-way analysis of variance, we can reject the null hypothesis, which was that there is no relationship between heart failure hospitalizations and geographical region of the U.S. Instead, we can accept the alternative hypothesis, which was that there is indeed a strong relationships between heart failure hospitalizations and U.S. geographical region. More specifically, this choice is evidenced by the majority of adjusted p-values being statistically significant (14/15 are less than 0.01), as well as the f-value being far greater than 1 (123.2). However, although the data set used was rather large, if this test were to be reperformed in order to ensure or enhance the validity of the results, it is important that a different population of U.S. residents be used, as that would help prove that these findings are not based on coincidence.
+
+### Does Age influence the prevalence of Cardiovascular Disease among Hospitalizations?
+
+Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
+
+```{r data-preparation1, echo=FALSE}
+age_comparison <- cms_data %>% 
+  filter(Break_Out_Category == "Age", !is.na(Data_Value)) %>%
+  rename(Age = "Break_Out") %>% 
+  filter(Data_Value_Unit == "Percent (%)")
+```
+
+```{r general-summary1, echo=FALSE, message=FALSE}
+## A general analysis and data clean up for comparing relationship between age and
+## Cardiovascular Diseases and Hospitalizations.
+age_only <- age_comparison %>% 
+  group_by(Topic, Age) %>% 
+  summarise(mean_percentage = mean(Data_Value),
+            median_percentage = median(Data_Value),
+            max_percentage = max(Data_Value),
+            min_percentage = min(Data_Value),
+            sd_percentage = sd(Data_Value),
+            iqr_percentage = IQR(Data_Value)) %>% 
+  arrange(Age)
+head(age_only, n=12)
+```
+
+Looking at the mean and median values for each disease topic and two age groups, the difference between demographics and outliers are minimal in this cardiovascular disease data set. However, in the age 65+ group with Major Cardiovascular Diseases, there was the greatest standard deviation and IQR among other diseases in all age group. Therefore, the observations for this sample is more spread out compared to other diseases (eg. Stroke).
+
+```{r topic-vs-age-box-plot, echo=FALSE}
+## New facet label names for diseases
+diseases_label <- c("Acute Myocardial Infarction", "Coronary Heart Disease", "Heart Disease", 
+    "Heart Failure", "Major Cardiovascular Disease",
+    "Stroke")
+names(diseases_label) <- c("Acute Myocardial Infarction (Heart Attack)", "Coronary Heart Disease",
+                     "Diseases of the Heart (Heart Disease)", "Heart Failure",
+                     "Major Cardiovascular Disease", "Stroke")
+
+## Box plot for age and disease comparison
+ggplot(data = age_comparison,
+       mapping = aes(x = Age, y = Data_Value, fill = Age)) +
+  geom_boxplot() +
+  facet_wrap( ~ Topic, scales = "free", labeller = labeller(Topic = diseases_label)) +
+  labs(title = "Distribution of Percentage of Cardiovascular Disease Prevalence across Age Groups",
+       y = "Percentage")
+```
+
+From the graphs, we can see that there is a relationship between age and heart diseases. For most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+. From this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+. In this sense, the age group of 75+ generally have higher percentage samples than the group of age 65+, except for Coronary Heart Disease; the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the age group of 65+.
+
+```{r linear-modeling, echo=FALSE}
+## Set up a linear model to compare relationship using original age_comparison data frame
+model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
+tidy(model1)
+```
+
+Linear effects model for age and prevalence (%) of cardiovascular disease among hospitalizations:
+
+*Prevalence (%) of Cardiovascular Heart Disease among Hospitalizations= 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+
+The baseline for this model is Acute Myocardial Infarction (Heart Attack) and age 65+, and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634. When Coronary Heart Disease is true (value of 1), the percentage will add by 3.906 on top of 2.634 baseline value. If Disease of the Heart is true, the percentage will add 15.069 on top of 2.634. If Heart Failure is true, the percentage will add 2.067 on top of 2.634. If Major Cardiovascular Disease is true, the percentage will add 20.930 on top of 2.634. If Stroke is true, the percentage will add 0.885 on top of 2.634. Lastly, if the observed patient is in the age group of 75+, the percentage will add 0.488 on top of 2.634; although it is a minor change, being in the 75+ age group increases the likelihood of cardiovascular disease prevalence for all hospitalizations by 0.488 percent on average.
+
+```{r spliting-data, echo=FALSE, message=FALSE}
+## Set seed to 8239
+set.seed(8239)
+
+## Split age_comparison using initial_split
+age_split <- initial_split(age_comparison, prop=0.7)
+
+## Randomly sample 70% of rows and assign to age_train
+age_train <- training(age_split)
+## Assign remaining 30% to age_test
+age_test <- testing(age_split)
+
+## Fit linear effects model to training data
+model1_age <- lm(Data_Value ~  Age + Topic, data=age_train)
+
+train_rsquared <- glance(model1_age) %>% 
+  select(adj.r.squared)
+train_rsquared
+
+## Create augmented data frame for model1_age
+model1_age_aug <- augment(model1_age)
+
+## Residual plot for model1_age_aug
+## ggplot(data=model1_age_aug, 
+##       mapping=aes(x=.fitted,
+##                   y=.resid)) +
+##  geom_point() +
+##  geom_hline(yintercept=0,color="red") +
+##  labs(title="Residual Plot for model1_age_aug",
+##       x="Predicted Values for Data_Value",
+##       y="Residuals")
+
+## Examine specific Variable for Insight on Distribution of Residuals
+## ggplot(data=model1_age_aug %>% 
+##         filter(Age=="65+", Topic=="Stroke"), 
+##       mapping=aes(x=.fitted,
+##                   y=.resid)) +
+##  geom_point() +
+##  geom_hline(yintercept=0,color="red")
+
+## Evaluate model
+model1_age_pred <- predict(model1_age, age_test) %>% 
+  bind_cols(age_test %>% 
+  select(Data_Value)) %>% 
+  rename(pred=...1)
+
+## Calculate rmse for model1_age_pred
+model1_age_pred_rmse <- rmse(model1_age_pred, truth=Data_Value, estimate=pred)
+
+## Extract minumum and maximum values of Data_Value in age_test data frame
+## age_test %>% 
+##  summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
+
+## Set up a linear model to compare relationship using training age_train data frame.
+## model1_age <- lm(Data_Value ~ Topic + Age, data = age_train)
+## tidy(model1_age)
+```
+
+Splitting the age_comparison data into a training set with the size of 70% and a test set with the size of 30%, we get marginally different computations in comparison to the original linear effects model. The adjusted r squared for this training model is `r train_rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model. Furthermore, the predicted rmse value for the split data frame is `r model1_age_pred_rmse`, which is relatively low and illustrates that age and topics are good predictors for percent composition of cardiovascular disease prevalence among hospitalizations.
+
+Since the adjusted r squared of the linear effects model shows that our linear model is significant, we can tell that different types of cardiovascular diseases have varying impacts on the prevalence of cardiovascular disease among hospitalized patients. Comparing with all the diseases, however, the impact of age demographics (65+ vs. 75+) on the percentage of people having cardiovascular diseases will be relatively insignificant compared to others. Even though it shows that there isn't a strong relationship between age and cardiovascular disease prevalence, there are not enough samples from other age groups to tell us the true impacts of age on cardiovascular disease prevalence. So from this data set, it isn't sufficient for us to get to a conclusion if there is an actual relationship between age and prevalence of cardiovascular diseases among hospitalizations.
+
+## Conclusion
+
+From the collective statistical analyses of our proposed research questions, our understanding of the relationship between predictor variables and susceptibility for cardiovascular disease has furthered. Whether it was rejecting null hypotheses through testing statistical significance or observing the numerical effects of predictors, we have a greater understanding of the influences a variable can have on the underlying issue of cardiovascular disease hospitalizations. In terms of critiques and suggestions, a consensus was made that our data set was not representative of the larger U.S. population and subsequent statistical conclusions were not concrete. Furthermore, we agreed that cross-referencing data sets would lead to increased accuracy of our findings and provide further justifications for relationships between predictor variables and cardiovascular disease related hospitalizations. If analysis on this issue were to be conducted again, it is essential to incorporate diverse data sets with differing demographics and variables to truly gather insights on this critical issue.
