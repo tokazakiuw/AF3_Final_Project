@@ -682,9 +682,7 @@ Linear model for age and cardiovascular disease: *Percentage of Cardiovascular H
 
 The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
 
-The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
-
-```{r spliting-data, echo=FALSE}
+```{r spliting-data, echo=FALSE, message=FALSE}
 ## Set seed to 8239
 set.seed(8239)
 
