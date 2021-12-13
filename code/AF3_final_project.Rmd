@@ -714,7 +714,10 @@ ggplot(data=model1_age_aug,
        mapping=aes(x=.fitted,
                    y=.resid)) +
   geom_point() +
-  geom_hline(yintercept=0,color="red")
+  geom_hline(yintercept=0,color="red") +
+  labs(title="Residual Plot for model1_age_aug",
+       x="Predicted Values for Data_Value",
+       y="Residuals")
 
 ## Evaluate model
 model1_age_pred <- predict(model1_age, age_test) %>% 
