@@ -673,7 +673,9 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+Linear model for age and cardiovascular disease:
+
+*Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
 
 The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
 
@@ -718,6 +720,14 @@ ggplot(data=model1_age_aug,
   labs(title="Residual Plot for model1_age_aug",
        x="Predicted Values for Data_Value",
        y="Residuals")
+
+## Examine specific Variable for Insight on Distribution of Residuals
+## ggplot(data=model1_age_aug %>% 
+##         filter(Age=="65+", Topic=="Stroke"), 
+##       mapping=aes(x=.fitted,
+##                   y=.resid)) +
+##  geom_point() +
+##  geom_hline(yintercept=0,color="red")
 
 ## Evaluate model
 model1_age_pred <- predict(model1_age, age_test) %>% 
