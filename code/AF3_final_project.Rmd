@@ -615,9 +615,8 @@ one.way <- aov(Data_Value ~ Region, data = cms_hf)
 TukeyHSD(one.way)
 summary(one.way)
 ```
-According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts:
-1. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant.
-2. The test gave an F-Value of 123.2, which is far greater than the ~1 necessary to accept the null hypothesis.
+
+According to a One-Way Analysis of Variance performed on the data, we can, with 95% confidence, reject the null hypothesis that Heart Failure hospitalizations are not influenced by U.S. Region. This is due specifically to two facts: 1. Of the 15 comparisons made, 14 of them have adjusted p-values that are less than 0.01, meaning that most of these differences are statistically significant. 2. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
 
 #### Does age influence Cardiovascular Disease and Hospitalizations?
 
@@ -672,7 +671,21 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-```{r spliting-data}
+Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+
+The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
+
+```{r adjusted-r-squared, echo=FALSE}
+## Calculate the r.squared
+rsquared <- glance(model1) %>% 
+  select(adj.r.squared) %>% 
+  pull()
+rsquared
+```
+
+The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
+
+```{r spliting-data, echo=FALSE}
 ## Set seed to 8239
 set.seed(8239)
 
@@ -681,7 +694,7 @@ age_split <- initial_split(age_comparison, prop=0.7)
 
 ## Randomly sample 70% of rows and assign to age_train
 age_train <- training(age_split)
-## Assign remaining to age_test
+## Assign remaining 30% to age_test
 age_test <- testing(age_split)
 
 ## Fit linear effects model to training data
@@ -705,25 +718,13 @@ model1_age_pred <- predict(model1_age, age_test) %>%
   select(Data_Value)) %>% 
   rename(pred=...1)
 
+## Calculate rmse for model1_age_pred
 rmse(model1_age_pred, truth=Data_Value, estimate=pred)
 
+## Extract minumum and maximum values of Data_Value in age_test data frame
 age_test %>% 
   summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
 ```
-
-Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
-
-The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
-
-```{r adjusted-r-squared, echo=FALSE}
-## Calculate the r.squared
-rsquared <- glance(model1) %>% 
-  select(adj.r.squared) %>% 
-  pull()
-rsquared
-```
-
-The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
 
 ## Conclusion(s)
 
