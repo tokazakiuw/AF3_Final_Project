@@ -401,7 +401,7 @@ south_hisp
 
 The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
 
-### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
+### Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?
 
 ```{r stat-analysis-gender-1, echo=FALSE}
 ## Summarize the mean, median, IQR, and sd by Gender and Rate
@@ -636,11 +636,7 @@ According to a One-Way Analysis of Variance performed on the data, we can, with 
 
 2\. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
 
-<<<<<<< HEAD
 ### Does age influence Cardiovascular Disease and Hospitalizations?
-=======
-#### **Does age influence Cardiovascular Disease and Hospitalizations**?
->>>>>>> 85267eb2de9541b07ac0847ca8c05d575eaf5601
 
 Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
