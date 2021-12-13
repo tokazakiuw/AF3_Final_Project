@@ -72,30 +72,47 @@ glimpse(cms_data)
 
 A description of the variables is below:
 
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | Variable Name         | Description                                                                                                   | Data Type  |
-|-----------------------|---------------------------------------------------------------------------------------------------------------|------------|
++=======================+===============================================================================================================+============+
 | `Year`                | Year                                                                                                          | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationAbbr`        | Location abbreviation                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea1`       | Priority Area (Million Hearts® or None)                                                                       | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea2`       | Priority Area (ABCS or None)                                                                                  | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea3`       | Priority Area (Healthy People 2020 or None)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `PriorityArea4`       | Priority Area (AHA 2020 Goals: Cardiovascular Health Metrics or None)                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Topic`               | Topic description                                                                                             | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Indicator`           | Indicator description                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value_Unit`     | Data Value Unit (%, rate per 100,000, etc.)                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Data_Value`          | Data value (point estimate)                                                                                   | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LowConfidenceLimit`  | 95% confidence interval lower bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `HighConfidenceLimit` | 95% confidence interval upper bound                                                                           | Number     |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out_Category`  | Break out category description                                                                                | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `Break_Out`           | Break out group description                                                                                   | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `LocationId`          | Location lookup value                                                                                         | Plain Text |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 | `GeoLocation`         | Latitude & Longitude to be provided for formatting GeoLocation or Geocode in the format (latitude, longitude) | Location   |
++-----------------------+---------------------------------------------------------------------------------------------------------------+------------+
 
 ## Analysis
 
 In this section, we will analyze the data to address various research questions
 
-#### How is race related to Cardiovascular Disease and Hospitalizations?
+### How is race related to Cardiovascular Disease and Hospitalizations?
 
 ```{r race-initial-analysis, echo=FALSE}
 # filter categories for race 
@@ -235,7 +252,7 @@ hisp_boot_diff_mean %>%
 
 We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher. Furthermore, using the p-value of 0 found from both differences in means, we reject the null and accept the alternative hypothesis stating that being a Hispanic or Non-Hispanic Black individual does increase the risk of being hospitalized for Cardiovascular Disease in the US.
 
-### Can we predict the rate of Hospitalizations for people of different races based on their location?
+#### Can we predict the rate of Hospitalizations for people of different races based on their location?
 
 ```{r race-modeling, echo=FALSE}
 
@@ -287,13 +304,13 @@ tidy(hisp_model_south)
 
 From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
 
-### Can we predict the rate of Hospitalizations for people of different races based on their location?
+#### Can we predict the rate of Hospitalizations for people of different races based on their location?
 
 $$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ West\ Coast = 33.979\ -\ 10.9035\ *\ Non-Hispanic\ White\ -\ 7.893033\ *\ in\_west$$ $$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ South = 31.030483 \ -\ -10.916\ *\ Non-Hispanic\ White\ +\ 4.195183   \ *\ in\_west$$
 
 $$Hospitalizations\ of\ Hispanics\ in\ West\ Coast = 27.273 - 4.257\ *\ Non-Hispanic\ White\ -\ 7.619\ *\ in\_west$$ $$Hospitalizations\ of\ Hispanics\ in\ South = 24.558 + Non-Hispanic\ White -4.218 + in\_south$$ From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. The difference of \~10 people in the rate of African Americans compared to White Americans and the difference of \~4 people of Hispanics compared to White Americans is also consistent with the values found in our 95% confidence interval. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
 
-### RMSE for the Models of Hospitalization of African Americans and Hispanics
+#### RMSE for the Models of Hospitalization of African Americans and Hispanics
 
 ```{r RMSE, echo=FALSE, include=FALSE}
 
@@ -384,7 +401,7 @@ south_hisp
 
 The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
 
-#### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
+### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
 ```{r stat-analysis-gender-1, echo=FALSE}
 ## Summarize the mean, median, IQR, and sd by Gender and Rate
@@ -555,7 +572,7 @@ gender_high_pvalue <- gender_high_boot_diff_prop %>%
 
 At a 1% level of significance the p-value must be \>= 0.01 to draw a conclusion, which is rejecting the null hypothesis. Since the p-value is extremely small (p-value = `r gender_high_pvalue`) and is less than 0.01, we are provided with strong evidence to reject the null hypothesis that gender has no influence on a patient's susceptibility for high rates of heart failure related hospitalizations. Furthermore, we can conclude that our data provides strong evidence that in the population of patients our data is sampled from, males are adversely impacted by high rates of heart failure related hospitalizations in proportion to females.
 
-#### Is there a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.?
+### Is there a relationship between Heart Failure Hospitalizations and Geographical Region of the U.S.?
 
 ```{r data-preparation, echo=FALSE}
 cms_filter <- cms_data %>% 
@@ -619,7 +636,7 @@ According to a One-Way Analysis of Variance performed on the data, we can, with 
 
 2\. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
 
-#### Does age influence Cardiovascular Disease and Hospitalizations?
+### Does age influence Cardiovascular Disease and Hospitalizations?
 
 Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
