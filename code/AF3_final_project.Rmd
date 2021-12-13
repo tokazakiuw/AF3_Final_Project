@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 output: openintro::lab_report
 ---
 
-```{r load-packages, message=FALSE, echo=FALSE, warning=FALSE}
+```{r load-packages, message=FALSE, echo=FALSE}
 #install.packages("tidymodels")
 library(tidyverse)
 library(openintro)
@@ -30,7 +30,7 @@ Cardiovascular disease susceptibility and related hospitalizations is a crucial 
 
 Using data gathered from Medicare and Medicaid patients, the Center for Medicare & Medicaid services (CMS) compiles claim data across numerous categorical and numerical variables. Collected from a variety of sources including: hospital databases, diagnostic reports, and surveys whilst adhering to an array of Quality Rating System (QRS) guidelines and requirements, the Center for Medicare & Medicaid services provides reliable and representative data. Computed by personnel in CDC's Division for Heart Disease and Stroke Prevention (DHDSP), furthermore, this [data set](https://chronicdata.cdc.gov/Heart-Disease-Stroke-Prevention/Center-for-Medicare-Medicaid-Services-CMS-Medicare/iw6q-r3ja) provides potential insights on Cardiovascular disease (CVD) indicators and associated risk factors; categorized by variables such as age, race/ethnicity, and location, this data set can be processed and analyzed using statistical methods to highlight insights into CVD prevention. Specifically, this data set includes anonymous CVD hospitalizations data from Medicare & Medicaid patients of age 65+ across the United States. Considering the influences and patterns variables can have with regard to predicting CVD hospitalization instances, it is important to dissect and analyze those of paramount importance. Consequently, our general research question(s) are as follows: What are the main factors that influence a patient's susceptibility for developing cardiovascular disease and hospitalization rates? Is there a significant relationship between specific variables and the prevalence of cardiovascular disease and hospitalization rates?
 
-```{r introduction-stats, echo=FALSE}
+```{r introduction-stats, echo=FALSE, include=FALSE}
 ## Summarize the mean and median value by Predictor Variables and Percent
 variable_stats_percent <- cms_data %>% 
   filter(Data_Value_Unit=="Percent (%)", Indicator=="Prevalence of major cardiovascular disease hospitalizations among all hospitalizations, US Medicare FFS beneficiaries (65+)") %>% 
@@ -183,12 +183,22 @@ avg_mean <- cms_data %>%
   filter(!is.na(Break_Out), !is.na(Data_Value)) %>%
   group_by(LocationAbbr, Break_Out) %>%
   summarize(mean = mean(Data_Value),
-            median = median(Data_Value))
+            median = median(Data_Value)) %>%
+  mutate(in_south = case_when(
+    LocationAbbr %in% c("MD", "DE", "VA", "WV", "KY", "TN", "NC", "SC", "FL", "GA", "AL", "MS", "LA", "AR", "TX", "OK") ~ "yes", TRUE ~ "no"
+  ),
+  in_west = case_when(
+    LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ "yes", TRUE ~ "no"
+  ))
   
 head(avg_mean)
+
+# Find confidence interval/difference in means
+# Do hypothesis testing 
+
 ```
 
-```{r diff_in_means_black, echo=FALSE, include=FALSE}
+```{r diff_in_means_black, echo = FALSE}
 set.seed(5734)
 black_boot_diff_mean <- cms_data %>%
   filter(Break_Out_Category == "Race", Data_Value_Unit=="Rate per 1,000") %>% 
@@ -199,9 +209,8 @@ black_boot_diff_mean <- cms_data %>%
   generate(reps = 1000, type = "bootstrap") %>%
   calculate(stat = "diff in means",
   order=c("Non-Hispanic Black", "Non-Hispanic White"))
-```
-
-```{r black-boot, echo=FALSE, message=FALSE, warning=FALSE}
+  
+head(black_boot_diff_mean)
 black_ci <- get_confidence_interval(black_boot_diff_mean)
 black_ci
 
@@ -212,9 +221,6 @@ black_boot_diff_mean %>%
        y="count",
        x="Bootstrapped difference in mean value between Whites and African Americans") +
   shade_p_value(obs_stat=black_ci$upper_ci, direction="both")
-
-black_boot_diff_mean %>%
-   get_p_value(obs_stat=0.05, direction="both")
 
 ```
 
@@ -229,9 +235,8 @@ hisp_boot_diff_mean <- cms_data %>%
   generate(reps = 1000, type = "bootstrap") %>%
   calculate(stat = "diff in means",
   order=c("Hispanic", "Non-Hispanic White"))
-```
-
-```{r hisp-boot, echo=FALSE, message=FALSE, warning=FALSE}  
+  
+head(hisp_boot_diff_mean)
 hisp_ci <- get_confidence_interval(hisp_boot_diff_mean)
 hisp_ci
 
@@ -243,16 +248,13 @@ hisp_boot_diff_mean %>%
        x="Bootstrapped difference in mean value between Whites and Hispanics") +
   shade_p_value(obs_stat=hisp_ci$upper_ci, direction="both")
 
-hisp_boot_diff_mean %>%
-   get_p_value(obs_stat=0.05, direction="both")
-
 ```
 
 We can see with 95% confidence, the difference in rates between whites and Non-Hispanic African Americans falls in between 10 \~ 12 people higher for Non-Hispanic Black Individuals and the difference between white and Hispanic people is 3 \~ 5 people higher. Furthermore, using the p-value of 0 found from both differences in means, we reject the null and accept the alternative hypothesis stating that being a Hispanic or Non-Hispanic Black individual does increase the risk of being hospitalized for Cardiovascular Disease in the US.
 
 ### Can we predict the rate of Hospitalizations for people of different races based on their location?
 
-```{r black-race-modeling, echo=FALSE}
+```{r race-modeling, echo=FALSE}
 
 # create new data frame for Non-Hispanic Black Americans and Non-Hispanic Whites
 # Add new columns listing what states are in west coast and south
@@ -267,11 +269,10 @@ black_only <- cms_data %>%
      LocationAbbr %in% c("CO", "ID", "MT", "NV", "UT", "WY", "AK", "CA", "HI", "OR", "WA") ~ 1, TRUE ~ 0
   )) 
   
-# create regression model of hospitalizations in west coast
+  
 black_model_west <- lm(Data_Value ~ Break_Out + in_west, data = black_only)
 tidy(black_model_west)
 
-# create regression model of hospitalizations in south
 black_model_south <- lm(Data_Value ~ Break_Out + in_south, data = black_only)
 tidy(black_model_south)
 
@@ -300,12 +301,19 @@ tidy(hisp_model_west)
 hisp_model_south <- lm(Data_Value ~ Break_Out + in_south, data = hisp_only)
 tidy(hisp_model_south)
 ```
+<<<<<<< HEAD
+
+From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
+
+### Can we predict the rate of Hospitalizations for people of different races based on their location?
+=======
 $$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ West\ Coast = 33.979\ -\ 10.9035\ *\ Non-Hispanic\ White\ -\ 7.893033\ *\ in\_west$$
 $$Hospitalizations\ of\ Non-Hispanic\ Black\ Individuals\ in\ South = 31.030483	\ -\ -10.916\ *\ Non-Hispanic\ White\ +\ 4.195183	\ *\ in\_west$$
 
 $$Hospitalizations\ of\ Hispanics\ in\ West\ Coast = 27.273 - 4.257\ *\ Non-Hispanic\ White\ -\ 7.619\ *\ in\_west$$
 $$Hospitalizations\ of\ Hispanics\ in\ South = 24.558 + Non-Hispanic\ White -4.218 + in\_south$$
 From these models, we see that around 31 \~ 33 Non-Hispanic Black Individuals and around 24 \~ 27 Hispanics are expected to be hospitalized for cardiovascular disease. The difference of ~10 people in the rate of African Americans compared to White Americans and the difference of ~4 people of Hispanics compared to White Americans is also consistent with the values found in our 95% confidence interval. It also shows that in more diverse, liberal places such as the west coast, the rate of hospitalization goes down by 7 \~ 8 people for Hispanics and African Americans and goes up by around 3 \~ 4 in the more conservative south.
+>>>>>>> 4de41956e26ea628c688aa045ef7ecfdd3d9b996
 
 ### RMSE for the Models of Hospitalization of African Americans and Hispanics
 
@@ -355,20 +363,19 @@ hisp_split <- initial_split(hisp_only, prop=0.8)
 hisp_train<-training(hisp_split)
 hisp_test <- testing(hisp_split)
 
-# fit a model for Hispancs in west
+# fit a model for Non-Hispanic African Americans in west
 hisp_fit <- lm(Data_Value ~ Break_Out + in_west, data = hisp_train)
 tidy(hisp_fit)
 
-# predict values and reshape dataset
 hisp_pred <- predict(hisp_fit, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
-# filter for only Hispanic data
+#head(hisp_pred)
+
 hisp_pred <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
 
-# get RSME 
 west_hisp <- rmse(hisp_pred, truth = Data_Value, estimate = pred)
 west_hisp
 # fit model for those in the south
@@ -379,6 +386,7 @@ hisp_pred_south <- predict(hisp_fit_south, newdata=hisp_test) %>%
   bind_cols(hisp_test %>% select(Data_Value, Break_Out)) %>%
   rename(pred = ...1)
 
+#head(hisp_pred_south)
 
 hisp_pred_south <- hisp_pred %>%
   filter(Break_Out == "Hispanic")
@@ -387,7 +395,20 @@ south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
 south_hisp
 ```
 
+<<<<<<< HEAD
 The RMSEs for the models of Hospitalizations of African Americans in the west south was found to be 14.88525 while for Hispanics it was 22.4447. These values are exceptionally high, meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
+=======
+<<<<<<< HEAD
+=======
+###RMSE for Models of Hispanics Black in the West and South
+>>>>>>> 4de41956e26ea628c688aa045ef7ecfdd3d9b996
+```{r hisp-RMSE-result, echo=FALSE}
+west_hisp
+south_hisp
+```
+
+The RMSE is really high meaning that these models are not the best predictors for the rate of hospitalization. While there is definitely a relationship between the high rate of cardiovascular disease in Hispanics and Non-Hispanic Black Americans, there are more factors than what is shown in this data set.
+>>>>>>> 5fca61a2ff60a01d474a5ec70daad4d0ce5b3c01
 
 #### **Are there differences in Heart Failure Hospitalization Rates and Gender (Male vs. Female)?**
 
@@ -624,7 +645,7 @@ According to a One-Way Analysis of Variance performed on the data, we can, with 
 
 2\. The test gave an F-Value of 123.2, which is far greater than the \~1 necessary to accept the null hypothesis.
 
-#### **Does age influence Cardiovascular Disease and Hospitalizations**?
+#### Does age influence Cardiovascular Disease and Hospitalizations?
 
 Here is a starting data summary of the data set comparing the relationship between age and different types of heart diseases
 
@@ -677,11 +698,23 @@ model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
 
-Linear model for age and cardiovascular disease: *Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
+Linear model for age and cardiovascular disease:
+
+*Percentage of Cardiovascular Heart Diseases = 2.634 + Coronary Heart Disease \* 3.906 + Diseases of the Heart \* 15.069 + Heart Failure \* 2.067 + Major Cardiovascular Disease \* 20.930 + Stroke \* 0.885 + Age 75+ \* 0.488*
 
 The baseline for this model is Acute Myocardial Infarction (Heart Attack), and this model means, when there is no other diseases except for Acute Myocardial Infarction, the percentage of people from age group of 65+, will be about 2.634, and when Coronary Heart Disease is considered, the percentage will add 3.906 on top of 2.634, which will be about 6.54. If Disease of the Heart is considered, the percentage will add 15.069 on top of 2.634, which will be about 17.703. If Heart Failure is considered, the percentage will add 2.067 on top of 2.634, which will be about 4.701. If Major Cardiovascular Disease is considered, the percentage will add 20.930 on top of 2.634, which will be about 23.564. If stroke is considered, the percentage will add 0.885 on top of 2.634, which will be about 3.519. Lastly, if the age of people is in the group of 75+, the percentage will add 0.488 on top of 2.634, which will be about 3.122.
 
-```{r spliting-data, echo=FALSE, message=FALSE}
+```{r adjusted-r-squared, echo=FALSE}
+## Calculate the r.squared
+rsquared <- glance(model1) %>% 
+  select(adj.r.squared) %>% 
+  pull()
+rsquared
+```
+
+The adjusted r squared for this model is `r rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
+
+```{r spliting-data, echo=FALSE}
 ## Set seed to 8239
 set.seed(8239)
 
@@ -713,6 +746,14 @@ ggplot(data=model1_age_aug,
        x="Predicted Values for Data_Value",
        y="Residuals")
 
+## Examine specific Variable for Insight on Distribution of Residuals
+## ggplot(data=model1_age_aug %>% 
+##         filter(Age=="65+", Topic=="Stroke"), 
+##       mapping=aes(x=.fitted,
+##                   y=.resid)) +
+##  geom_point() +
+##  geom_hline(yintercept=0,color="red")
+
 ## Evaluate model
 model1_age_pred <- predict(model1_age, age_test) %>% 
   bind_cols(age_test %>% 
@@ -741,8 +782,11 @@ Gender: Although observations can be made about the association between gender a
 
 Geographical Region: Due to the of the results of the one-way analysis of variance, we can reject the null hypothesis, which was that there is no relationship between heart failure hospitalizations and geographical region of the U.S. Instead, we can accept the alternative hypothesis, which was that there is indeed a strong relationships between heart failure hospitalizations and U.S. geographical region. More specifically, this choice is evidenced by the majority of adjusted p-values being statistically significant (14/15 are less than 0.01), as well as the f-value being far greater than 1 (123.2). However, although the data set used was rather large, if this test were to be reperformed in order to ensure or enhance the validity of the results, it is important that a different population of U.S. residents be used, as that would help prove that these findings are not based on coincidence.
 
+<<<<<<< HEAD
+=======
 Race: At the beginning of this research question we inquired about the relationship between race and cardiovascular hospitalizations in the US. Looking at the average rates, medians, and visuals of Hispanics and Non-Hispanic Black Individuals compared to Non-Hispanic Whites, it is clear these races suffer from a higher rate of cardiovascular hospitalizations. At a 95% confidence level, we found that a higher number of Hispanics and a significantly larger amount of African Americans are hospitalized for cardiovascular issues compared to Caucasians. With a p-value of 0, the differences between each group was significant, meaning that we did reject a null and found that being Hispanic or Black has a relationship with higher rates of hospitalization. Furthermore, attempting to predict these numbers with linear models might be possible, however, within this data set there are not enough statistics of the possible variables involved that would help us create that sort of predictor. 
 
+>>>>>>> 4de41956e26ea628c688aa045ef7ecfdd3d9b996
 [Cohesive Conclusion]
 
 From the collective statistical analyses of our proposed research questions, \_\_\_
