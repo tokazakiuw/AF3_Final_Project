@@ -398,10 +398,8 @@ south_hisp <- rmse(hisp_pred_south, truth = Data_Value, estimate = pred)
 south_hisp
 ```
 
-<<<<<<< HEAD
-=======
 ###RMSE for Models of Hispanics Black in the West and South
->>>>>>> 4de41956e26ea628c688aa045ef7ecfdd3d9b996
+
 ```{r hisp-RMSE-result, echo=FALSE}
 west_hisp
 south_hisp
@@ -781,11 +779,6 @@ Gender: Although observations can be made about the association between gender a
 
 Geographical Region: Due to the of the results of the one-way analysis of variance, we can reject the null hypothesis, which was that there is no relationship between heart failure hospitalizations and geographical region of the U.S. Instead, we can accept the alternative hypothesis, which was that there is indeed a strong relationships between heart failure hospitalizations and U.S. geographical region. More specifically, this choice is evidenced by the majority of adjusted p-values being statistically significant (14/15 are less than 0.01), as well as the f-value being far greater than 1 (123.2). However, although the data set used was rather large, if this test were to be reperformed in order to ensure or enhance the validity of the results, it is important that a different population of U.S. residents be used, as that would help prove that these findings are not based on coincidence.
 
-<<<<<<< HEAD
-=======
 Race: At the beginning of this research question we inquired about the relationship between race and cardiovascular hospitalizations in the US. Looking at the average rates, medians, and visuals of Hispanics and Non-Hispanic Black Individuals compared to Non-Hispanic Whites, it is clear these races suffer from a higher rate of cardiovascular hospitalizations. At a 95% confidence level, we found that a higher number of Hispanics and a significantly larger amount of African Americans are hospitalized for cardiovascular issues compared to Caucasians. With a p-value of 0, the differences between each group was significant, meaning that we did reject a null and found that being Hispanic or Black has a relationship with higher rates of hospitalization. Furthermore, attempting to predict these numbers with linear models might be possible, however, within this data set there are not enough statistics of the possible variables involved that would help us create that sort of predictor. 
 
->>>>>>> 4de41956e26ea628c688aa045ef7ecfdd3d9b996
-[Cohesive Conclusion]
-
-From the collective statistical analyses of our proposed research questions, \_\_\_
+From the collective statistical analyses of our proposed research questions,
