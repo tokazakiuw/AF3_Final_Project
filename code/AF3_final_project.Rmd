@@ -745,8 +745,8 @@ model1_age_pred <- predict(model1_age, age_test) %>%
 model1_age_pred_rmse <- rmse(model1_age_pred, truth=Data_Value, estimate=pred)
 
 ## Extract minumum and maximum values of Data_Value in age_test data frame
-age_test %>% 
-  summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
+## age_test %>% 
+##  summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
 
 ## Set up a linear model to compare relationship using training age_train data frame.
 ## model1_age <- lm(Data_Value ~ Topic + Age, data = age_train)
