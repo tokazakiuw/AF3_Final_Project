@@ -670,7 +670,7 @@ ggplot(data = age_comparison,
 From the graphs, we can see that there is a relationship between age and heart diseases, for most type of heart diseases displayed in the graphs, the 75+ age group have a higher percentage of having different types of heart diseases except for coronary heart diseases. From the spread and shape of the box plots, the age group of 65+ generally have a larger data spread than the age group of 75+, from this perspective, we can also see that the age group of 75+ have a more concentrated spread and higher than the group of age 65+, so in this sense, the age group of 75+ generally have more higher percentage samples than the group of age 65+, except for Coronary Heart Disease, the age group of 65+ have larger spread over in higher percentages than the age group of 75+. On the other hand, the age group of 75+ have a significant higher percentage with slightly smaller spread in Heart Failure than the agr group of 65+.
 
 ```{r linear-modeling, echo=FALSE}
-## Set up a linear model to compare relationship
+## Set up a linear model to compare relationship using original age_comparison data frame
 model1 <- lm(Data_Value ~ Topic + Age, data = age_comparison)
 tidy(model1)
 ```
@@ -703,8 +703,10 @@ age_test <- testing(age_split)
 
 ## Fit linear effects model to training data
 model1_age <- lm(Data_Value ~ Topic + Age, data=age_train)
-glance(model1_age) %>% 
+
+train_rsquared <- glance(model1_age) %>% 
   select(adj.r.squared)
+train_rsquared
 
 ## Create augmented data frame for model1_age
 model1_age_aug <- augment(model1_age)
@@ -731,7 +733,13 @@ rmse(model1_age_pred, truth=Data_Value, estimate=pred)
 ## Extract minumum and maximum values of Data_Value in age_test data frame
 age_test %>% 
   summarize(min(Data_Value, na.rm=T), max(Data_Value, na.rm=T))
+
+## Set up a linear model to compare relationship using training age_train data frame.
+model1_age <- lm(Data_Value ~ Topic + Age, data = age_train)
+tidy(model1_age)
 ```
+
+Splitting the age_comparison data into a training set with the size of 70% and a test set with the size of 30%, we get marginally different computations in comparison to the original linear effects model. The adjusted r squared for this training model is `r train_rsquared`, in this case, about 96.8% of the data from age and cardiovascular heart diseases is explained by the linear model.
 
 ## Conclusion(s)
 
